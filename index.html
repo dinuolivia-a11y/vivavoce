@@ -1,0 +1,1542 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vivavoce</title>
+<meta name="description" content="Il telefono squilla. È un rapitore. Ha preso il telecomando.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Vivavoce">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#DCE3DE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E2427" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..900&family=Special+Elite&family=Abril+Fatface&family=Bungee&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#DCE3DE; --ink:#13201E; --ink-2:#3A4845; --muted:#5B6965; --card:#FFFFFF; --edge:#13201E; --line:#B7C2BC;
+  --primary:#CF1F62; --on-primary:#FFFFFF; --ok:#1E8A5A; --on-ok:#FFFFFF; --warn:#C98A00; --bad:#D23B2B; --on-bad:#FFFFFF; --focus:#1C5BD6;
+  --text:"Archivo","Roboto","Segoe UI",system-ui,sans-serif;
+  --type:"Special Elite","Courier New",monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E2427; --ink:#ECF1EB; --ink-2:#C5D2CC; --muted:#8FA49D; --card:#173439; --edge:#ECF1EB; --line:#2C4C50;
+    --primary:#FF5C9A; --on-primary:#13201E; --ok:#4CD08A; --on-ok:#0E2427; --warn:#FFC94A; --bad:#FF6B5B; --on-bad:#0E2427; --focus:#8FB4FF;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E2427; --ink:#ECF1EB; --ink-2:#C5D2CC; --muted:#8FA49D; --card:#173439; --edge:#ECF1EB; --line:#2C4C50;
+  --primary:#FF5C9A; --on-primary:#13201E; --ok:#4CD08A; --on-ok:#0E2427; --warn:#FFC94A; --bad:#FF6B5B; --on-bad:#0E2427; --focus:#8FB4FF;
+  color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px);background:var(--paper)}
+body{margin:0;height:100%;background:var(--paper);color:var(--ink);font-family:var(--text);font-size:17px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
+h1,h2,h3{margin:0;line-height:1.1;font-weight:800}
+p{margin:0}
+button,input,select{font:inherit;color:inherit}
+#app{position:relative;height:100%;max-width:620px;margin:0 auto;overflow:hidden}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;gap:14px;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:16px max(18px,env(safe-area-inset-right,0px)) 18px max(18px,env(safe-area-inset-left,0px))}
+.screen.active{display:flex;animation:fade .2s ease-out}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.push{margin-top:auto}
+.center{text-align:center}
+
+/* pulsanti e campi */
+.btn{appearance:none;-webkit-appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:10px 18px;
+  border:2px solid var(--edge);border-radius:12px;background:var(--card);color:var(--ink);font-weight:750;font-size:17px;line-height:1.15;text-align:center;
+  cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.btn:active{transform:scale(.98)}
+.btn:focus-visible,.opt:focus-visible,.seg [role=radio]:focus-visible,.switch:focus-visible,.x:focus-visible,.mic:focus-visible,.field:focus-visible,select:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
+.btn.answer{background:var(--ok);border-color:var(--ok);color:var(--on-ok)}
+.btn.hang{background:var(--bad);border-color:var(--bad);color:var(--on-bad)}
+.btn.big{font-size:21px;font-weight:850;font-stretch:90%;min-height:62px}
+.btn.plain{border-color:transparent;background:transparent;text-decoration:underline;text-underline-offset:4px;min-height:44px;font-weight:650;color:var(--ink-2)}
+.btn.small{min-height:40px;padding:6px 12px;font-size:15px;border-radius:10px}
+.btn[disabled]{opacity:.45;cursor:default;transform:none}
+.btn.wide{width:100%}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stack{display:grid;gap:10px}
+.note-text{font-size:15px;color:var(--muted)}
+.field{min-width:0;height:52px;padding:0 14px;border:2px solid var(--edge);border-radius:12px;background:var(--card);color:var(--ink);font-size:17px;width:100%}
+.field::placeholder{color:var(--muted)}
+select.field{appearance:auto}
+
+/* il titolo: lettere ritagliate dai giornali */
+.collage{display:flex;justify-content:center;flex-wrap:nowrap;gap:0;font-size:clamp(34px,10.4vw,78px);font-weight:400;line-height:1;padding:10px 0 6px}
+.c{display:inline-block;padding:.07em .13em .05em;margin:0 .015em;box-shadow:2px 3px 0 rgba(0,0,0,.22);clip-path:polygon(3% 0,100% 5%,97% 100%,0 94%)}
+.c1{background:#FFFFFF;color:#111;font-family:"Abril Fatface",Georgia,serif;transform:rotate(-5deg)}
+.c2{background:#FFE24A;color:#111;font-family:var(--type);transform:rotate(4deg) translateY(.08em)}
+.c3{background:#1C2A6E;color:#FFF;font-family:"Bungee",Impact,sans-serif;transform:rotate(-2deg) translateY(-.04em)}
+.c4{background:#CF1F62;color:#FFF;font-family:var(--text);font-weight:900;transform:rotate(6deg) translateY(.05em)}
+.c5{background:#111;color:#FFF;font-family:"Abril Fatface",Georgia,serif;transform:rotate(-3deg) translateY(.03em)}
+.c6{background:#F3EBDD;color:#B5121B;font-family:"Bungee",Impact,sans-serif;transform:rotate(3deg) translateY(-.05em)}
+.c7{background:#7FD1C6;color:#111;font-family:var(--type);transform:rotate(-6deg) translateY(.06em)}
+.c8{background:#FFFFFF;color:#111;font-family:var(--text);font-weight:800;font-stretch:75%;transform:rotate(4deg)}
+
+/* biglietto battuto a macchina, attaccato con lo scotch */
+.note{position:relative;background:#FFFDF7;color:#141414;font-family:var(--type);font-size:20px;line-height:1.4;padding:24px 18px 18px;
+  transform:rotate(-.6deg);box-shadow:0 2px 0 rgba(0,0,0,.08),3px 6px 14px rgba(0,0,0,.18);text-wrap:pretty}
+.note::before{content:"";position:absolute;top:-10px;left:50%;width:96px;height:22px;transform:translateX(-50%) rotate(2deg);background:rgba(255,226,74,.75);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.note small{display:block;font-family:var(--text);font-size:14px;font-weight:700;color:#5B6965;margin-bottom:6px}
+
+/* home */
+#s-home{text-align:center;justify-content:space-between}
+.lead-note{margin:8px auto 0;max-width:30ch;font-size:21px}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;border:2px solid var(--line);font-size:15px;font-weight:700;color:var(--ink-2)}
+.chip i{width:10px;height:10px;border-radius:50%;background:var(--muted)}
+.chip.on i{background:var(--ok)}
+.chip.off i{background:var(--bad)}
+
+/* preparazione e impostazioni */
+.bar{display:flex;align-items:center;gap:12px}
+.bar h2{font-size:26px;font-stretch:90%}
+.block{display:grid;gap:10px}
+.block h3{font-size:19px}
+.add{display:flex;gap:10px}
+.plist{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.plist:empty{display:none}
+.plist li{display:inline-flex;align-items:center;gap:2px;padding:3px 3px 3px 14px;border:2px solid var(--edge);border-radius:999px;background:var(--card);font-weight:700}
+.x{appearance:none;width:36px;height:36px;border:0;border-radius:50%;background:transparent;color:var(--ink);font-size:24px;line-height:1;cursor:pointer}
+.levels{display:grid;gap:8px}
+.opt{appearance:none;display:grid;gap:2px;text-align:left;padding:12px 14px;border:2px solid var(--edge);border-radius:12px;background:var(--card);color:var(--ink);cursor:pointer}
+.opt b{font-size:18px}
+.opt span{font-size:15px;color:var(--ink-2)}
+.opt[aria-checked="true"]{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
+.opt[aria-checked="true"] span{color:var(--on-primary)}
+.seg{display:flex;gap:8px}
+.seg [role=radio]{appearance:none;flex:1;min-height:52px;padding:6px 4px;border:2px solid var(--edge);border-radius:12px;background:var(--card);color:var(--ink);font-weight:750;font-size:16px;line-height:1.2;cursor:pointer}
+.seg [role=radio] small{display:block;font-weight:500;font-size:13px;color:var(--muted)}
+.seg [aria-checked="true"]{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
+.seg [aria-checked="true"] small{color:var(--on-primary)}
+.switch{appearance:none;display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;padding:12px 14px;border:2px solid var(--edge);border-radius:12px;background:var(--card);color:var(--ink);text-align:left;cursor:pointer}
+.switch span{display:grid;gap:2px}
+.switch b{font-size:17px}
+.switch small{font-size:14px;color:var(--ink-2)}
+.switch i{flex:none;position:relative;width:52px;height:30px;border-radius:999px;border:2px solid var(--edge);background:var(--line)}
+.switch i::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--edge);transition:transform .15s}
+.switch[aria-checked="true"] i{background:var(--primary)}
+.switch[aria-checked="true"] i::after{transform:translateX(22px);background:var(--on-primary)}
+.panel{display:grid;gap:10px;padding:14px;border:2px solid var(--line);border-radius:14px}
+.panel p{color:var(--ink-2);font-size:16px}
+.status{font-weight:750}
+.status.ok{color:var(--ok)}
+.status.bad{color:var(--bad)}
+.cta{position:sticky;bottom:-18px;margin:auto -18px -18px;padding:14px 18px 18px;background:linear-gradient(to bottom,rgba(0,0,0,0),var(--paper) 28%)}
+.rules{display:grid;gap:10px;max-width:36em}
+.rules h3{font-size:20px;margin-top:10px}
+.rules p{color:var(--ink-2)}
+.rules .intro{font-size:19px;color:var(--ink)}
+
+/* ruoli segreti */
+#s-pass,#s-role{text-align:center;justify-content:center}
+.pass-name{font-size:clamp(44px,14vw,80px);font-weight:900;font-stretch:85%;line-height:1;overflow-wrap:anywhere}
+.pass-sub{font-size:19px;color:var(--ink-2);max-width:28ch;margin:0 auto}
+.role-note{min-height:330px;display:grid;align-content:center;gap:14px;text-align:left}
+.role-note h2{font-family:var(--type);font-weight:400;font-size:28px}
+.role-note p{font-family:var(--type);font-size:20px}
+.role-note .extra{font-size:17px;color:#444}
+
+/* lo squillo */
+#s-ring{text-align:center;justify-content:center;gap:20px}
+.handset{width:140px;height:140px;margin:0 auto;border-radius:50%;display:grid;place-items:center;background:var(--card);border:2px solid var(--edge);animation:ring 1.2s ease-in-out infinite}
+.handset svg{width:72px;height:72px;fill:var(--ink)}
+@keyframes ring{0%,40%,100%{transform:rotate(0)}5%,15%,25%,35%{transform:rotate(-10deg)}10%,20%,30%{transform:rotate(10deg)}}
+.ring-who{font-size:30px;font-weight:850;font-stretch:90%}
+.ring-sub{color:var(--ink-2);font-size:18px}
+
+/* la telefonata */
+#s-call{gap:12px}
+.call-top{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.clock{font-size:40px;font-weight:850;font-stretch:85%;font-variant-numeric:tabular-nums;line-height:1}
+.clock.low{color:var(--bad)}
+.pat{flex:1;max-width:220px;display:grid;gap:4px}
+.pat-row{display:flex;justify-content:space-between;font-size:14px;font-weight:750;color:var(--ink-2)}
+.meter{position:relative;height:14px;border:2px solid var(--edge);border-radius:999px;background:var(--line);overflow:hidden}
+.meter .fill{position:absolute;left:0;top:0;bottom:0;width:70%;background:var(--ok);transition:width .6s ease,background-color .6s}
+.meter .fill.warn{background:var(--warn)}
+.meter .fill.bad{background:var(--bad)}
+.facts{display:grid;gap:2px;font-size:16px}
+.facts b{font-weight:800}
+.call-note{min-height:150px}
+.call-status{min-height:1.4em;font-weight:750;color:var(--ink-2);text-align:center}
+.heard{min-height:1.4em;text-align:center;color:var(--muted);font-style:italic;overflow-wrap:anywhere}
+.mic-row{display:grid;justify-items:center;gap:6px}
+.mic{appearance:none;width:96px;height:96px;border-radius:50%;border:0;background:var(--primary);color:var(--on-primary);display:grid;place-items:center;cursor:pointer;touch-action:manipulation}
+.mic svg{width:42px;height:42px;fill:currentColor}
+.mic.listening{animation:pulse 1.1s ease-out infinite}
+.mic[disabled]{opacity:.4;cursor:default;animation:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(207,31,98,.55)}100%{box-shadow:0 0 0 22px rgba(207,31,98,0)}}
+.mic-label{font-weight:800;font-size:16px}
+.type-row{display:flex;gap:8px}
+.call-foot{display:flex;justify-content:space-between;gap:10px;align-items:center}
+#human-desk{display:grid;gap:8px}
+#cast-pick{display:grid;gap:8px}
+#script-note{font-size:16px;color:var(--ink-2)}
+#caster .opt[aria-checked="true"]{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
+#caster .opt[aria-checked="true"] span{color:var(--on-primary)}
+
+/* fine chiamata, voto, verdetto */
+#s-over,#s-vote,#s-unmask{text-align:center}
+.headline{font-size:clamp(34px,10vw,52px);font-weight:900;font-stretch:85%;line-height:1.02;text-wrap:balance}
+.subline{font-size:19px;color:var(--ink-2);text-wrap:balance}
+.count{font-size:clamp(90px,32vw,160px);font-weight:900;line-height:1;min-height:1.05em}
+.pick{display:grid;gap:8px}
+.pick .btn{font-size:20px}
+.goals{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.goal{display:grid;gap:6px;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:var(--card)}
+.goal-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.goal-head b{font-size:18px}
+.goal p{color:var(--ink-2);font-size:15px}
+.goal .why{font-style:italic}
+.toggle{appearance:none;min-width:116px;min-height:40px;border-radius:999px;border:2px solid var(--edge);background:transparent;color:var(--ink);font-weight:800;cursor:pointer}
+.toggle[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:var(--on-ok)}
+.board{list-style:none;margin:0;padding:0;display:grid;gap:8px;counter-reset:pos}
+.board li{display:flex;align-items:center;gap:12px;padding:10px 14px;border:2px solid var(--edge);border-radius:12px;background:var(--card);font-weight:700;counter-increment:pos}
+.board li::before{content:counter(pos);font-weight:900;min-width:1.2em;text-align:center}
+.board .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.board .tag{font-size:13px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--primary);color:var(--on-primary)}
+.board .sc{font-weight:900;font-size:22px;font-variant-numeric:tabular-nums}
+.board li.first{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
+.board li.first .tag{background:var(--on-primary);color:var(--primary)}
+.why-pts{font-size:14px;color:var(--muted)}
+.log{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.log li{padding:8px 0;border-bottom:1px solid var(--line);font-size:16px}
+.log .k{font-family:var(--type)}
+.log .who{display:block;font-size:13px;font-weight:800;color:var(--muted)}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:40;max-width:min(92vw,460px);
+  padding:12px 16px;border:2px solid var(--edge);border-radius:12px;background:var(--card);color:var(--ink);font-weight:700;
+  opacity:0;transform:translate(-50%,14px);pointer-events:none;transition:opacity .2s,transform .2s}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion: reduce){
+  .screen.active,.handset,.mic.listening{animation:none}
+  .switch i::after,.toast,.meter .fill{transition:none}
+}
+</style>
+</head>
+<body>
+<main id="app">
+
+  <section class="screen active" id="s-home" aria-labelledby="home-title">
+    <div>
+      <h1 class="collage" id="home-title" aria-label="Vivavoce"><span class="c c1" aria-hidden="true">V</span><span class="c c2" aria-hidden="true">i</span><span class="c c3" aria-hidden="true">V</span><span class="c c4" aria-hidden="true">a</span><span class="c c5" aria-hidden="true">v</span><span class="c c6" aria-hidden="true">O</span><span class="c c7" aria-hidden="true">c</span><span class="c c8" aria-hidden="true">e</span></h1>
+    </div>
+    <div class="note lead-note">Il telefono squilla. È un rapitore. Ha preso il telecomando, e vi concede dieci minuti per trattare.</div>
+    <div class="stack">
+      <p class="center"><span class="chip" id="engine-chip"><i></i><span id="engine-chip-text">Controllo il collegamento…</span></span></p>
+      <button class="btn primary big wide" data-go="setup" type="button">Nuova chiamata</button>
+      <div class="two">
+        <button class="btn" data-go="rules" type="button">Come si gioca</button>
+        <button class="btn" data-go="settings" type="button">Impostazioni</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="s-setup" aria-labelledby="setup-title">
+    <header class="bar"><button class="btn small" data-go="home" type="button">Indietro</button><h2 id="setup-title">Nuova chiamata</h2></header>
+    <p class="note-text" id="setup-engine"></p>
+    <div class="block">
+      <h3>Chi tratta col rapitore</h3>
+      <div class="add">
+        <input class="field" id="name-in" type="text" maxlength="16" placeholder="Scrivi un nome" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="done" aria-label="Nome di chi gioca">
+        <button class="btn" id="add-btn" type="button">Aggiungi</button>
+      </div>
+      <ul class="plist" id="plist" aria-live="polite"></ul>
+      <p class="note-text" id="pnote"></p>
+    </div>
+    <div class="block">
+      <h3 id="lv-h">Livello</h3>
+      <div class="levels" id="levels" role="radiogroup" aria-labelledby="lv-h">
+        <button class="opt" type="button" role="radio" data-val="soft"><b>Soft</b><span>Un cattivo da cartone animato: va bene anche con i bambini.</span></button>
+        <button class="opt" type="button" role="radio" data-val="ironico"><b>Ironico</b><span>Per adulti: sarcastico, permaloso e pieno di frecciatine.</span></button>
+        <button class="opt" type="button" role="radio" data-val="piccante"><b>Piccante</b><span>Un seduttore da telenovela. Solo se tutto il gruppo è d’accordo.</span></button>
+      </div>
+    </div>
+    <div class="block">
+      <h3 id="du-h">Durata della trattativa</h3>
+      <div class="seg" id="minutes" role="radiogroup" aria-labelledby="du-h">
+        <button type="button" role="radio" data-val="6">Breve<small>6 minuti</small></button>
+        <button type="button" role="radio" data-val="10">Normale<small>10 minuti</small></button>
+        <button type="button" role="radio" data-val="15">Lunga<small>15 minuti</small></button>
+      </div>
+    </div>
+    <div class="block">
+      <h3 id="who-h">Chi fa la voce</h3>
+      <div class="levels" id="caster" role="radiogroup" aria-labelledby="who-h">
+        <button class="opt" type="button" role="radio" data-cast="ai" aria-checked="true"><b>Il telefono</b><span>Risponde lui a quello che dite, quando la voce di casa è accesa. Nessuno porta una chiave.</span></button>
+        <button class="opt" type="button" role="radio" data-cast="human" aria-checked="false"><b>Uno di noi</b><span>Una persona fa il rapitore con la propria voce. Il telefono le tiene il copione, nascosto agli altri.</span></button>
+      </div>
+      <div id="cast-pick" hidden></div>
+    </div>
+    <div class="cta"><button class="btn primary big wide" id="start-btn" type="button">Distribuisci gli obiettivi</button></div>
+  </section>
+
+  <section class="screen" id="s-settings" aria-labelledby="set-title">
+    <header class="bar"><button class="btn small" data-go="home" type="button">Indietro</button><h2 id="set-title">Impostazioni</h2></header>
+    <div class="panel">
+      <h3>Chi fa il rapitore</h3>
+      <p class="status" id="engine-state"></p>
+      <p id="engine-help">La voce automatica si accende con una chiave sola, sul server, mai nel telefono di chi gioca. Senza quella, il rapitore lo fa uno di voi. La chiave qui sotto serve solo se volete un modello vostro, su questo telefono.</p>
+    </div>
+    <div class="panel">
+      <h3>Chiave di OpenRouter</h3>
+      <p>Resta salvata solo su questo telefono, mai nel codice. Create una chiave apposta per il gioco, con un limite di spesa.</p>
+      <input class="field" id="key-in" type="password" autocomplete="off" spellcheck="false" placeholder="Incolla qui la chiave (sk-or-…)" aria-label="Chiave di OpenRouter">
+      <div class="two"><button class="btn primary" id="key-save" type="button">Salva la chiave</button><button class="btn" id="key-clear" type="button">Cancella la chiave</button></div>
+      <label class="note-text" for="model-in">Modello</label>
+      <input class="field" id="model-in" type="text" autocomplete="off" spellcheck="false" aria-label="Modello di OpenRouter">
+      <button class="btn" id="test-conn" type="button">Prova il collegamento</button>
+      <p class="status" id="test-result" aria-live="polite"></p>
+    </div>
+    <div class="panel">
+      <h3>Voce e ascolto</h3>
+      <button class="switch" type="button" role="switch" data-key="voice"><span><b>Voce del rapitore</b><small>Il telefono legge ad alta voce le sue battute.</small></span><i aria-hidden="true"></i></button>
+      <label class="note-text" for="voice-sel">Voce</label>
+      <select class="field" id="voice-sel" aria-label="Voce del rapitore"></select>
+      <button class="btn" id="voice-test" type="button">Prova la voce</button>
+      <h3 id="li-h" style="margin-top:6px">Come vi ascolta</h3>
+      <div class="seg" id="listen" role="radiogroup" aria-labelledby="li-h">
+        <button type="button" role="radio" data-val="tap">Tocca e parla<small>un messaggio alla volta</small></button>
+        <button type="button" role="radio" data-val="auto">Sempre in ascolto<small>può sentire la propria voce</small></button>
+      </div>
+      <p class="note-text" id="mic-support"></p>
+    </div>
+  </section>
+
+  <section class="screen" id="s-rules" aria-labelledby="rules-title">
+    <header class="bar"><button class="btn small" data-go="home" type="button">Indietro</button><h2 id="rules-title">Come si gioca</h2></header>
+    <article class="rules">
+      <p class="intro">Il telefono squilla. Dall’altra parte c’è un rapitore melodrammatico e permaloso. Può essere il telefono, oppure uno di voi con la propria voce. Ha sequestrato qualcosa di assurdo e vi concede pochi minuti per trattare.</p>
+      <h3>Prima della chiamata</h3>
+      <p>Da 3 a 8 persone. Il telefono passa di mano in mano e ognuno riceve in segreto un obiettivo personale: farsi chiamare per nome, fargli dire «pistacchio», scoprire il suo vero nome. Uno di voi, invece, è il suo complice. Se il rapitore lo fa una persona, lei non è il complice e non prende punti: ha il copione.</p>
+      <h3>La voce</h3>
+      <p>Con «Il telefono», parlate in vivavoce e lui risponde. Quello che dite esce dal telefono e va al modello. Con «Uno di noi», il telefono lo tiene in mano chi fa il rapitore e gli altri non guardano: non esce niente. Durante la chiamata con il telefono potete riguardare il vostro obiettivo, gli altri voltati.</p>
+      <h3>La trattativa</h3>
+      <p>Toccate il microfono e parlategli: vi ascolta e risponde davvero a quello che dite. Improvvisa, si offende, alza il prezzo, cambia idea. Potete parlare in più persone, ma un messaggio alla volta. Se il microfono non funziona, scrivete o usate la dettatura della tastiera.</p>
+      <p>Sullo schermo vedete il tempo che resta e la sua pazienza. Se la pazienza finisce, riattacca.</p>
+      <h3>Il complice</h3>
+      <p>Il complice deve far fallire la trattativa senza farsi scoprire. Il rapitore sa di averne uno tra voi, ma non sa chi è.</p>
+      <h3>Alla fine</h3>
+      <p>Al tre indicate tutti chi credete sia il complice. Poi un giudice riascolta la telefonata e dice chi ha raggiunto il proprio obiettivo; se sbaglia, potete correggerlo voi.</p>
+      <h3>I punti</h3>
+      <p>Ostaggio liberato: 3 punti a ciascuno, tranne il complice. Ostaggio perso: 3 punti al complice. Ogni obiettivo segreto raggiunto vale 2 punti. Se smascherate il complice, 1 punto a testa agli altri; se la fa franca, 2 punti a lui.</p>
+      <h3>I livelli</h3>
+      <p>Soft è un cattivo da cartone animato, adatto anche ai bambini. Ironico è sarcastico e pieno di frecciatine. Piccante è un seduttore da telenovela: solo se tutto il gruppo è d’accordo.</p>
+    </article>
+    <div class="cta"><button class="btn primary big wide" data-go="setup" type="button">Nuova chiamata</button></div>
+  </section>
+
+  <section class="screen" id="s-pass" aria-labelledby="pass-name">
+    <p class="pass-sub">Passate il telefono a</p>
+    <h2 class="pass-name" id="pass-name"></h2>
+    <p class="pass-sub" id="pass-hint">Solo tu devi guardare lo schermo.</p>
+    <div class="pick" id="pass-pick" hidden></div>
+    <div class="stack push">
+      <button class="btn primary big wide" id="pass-show" type="button">Sono io: mostra l’obiettivo</button>
+      <button class="btn plain" id="pass-back" type="button" hidden>Torna alla telefonata</button>
+    </div>
+  </section>
+
+  <section class="screen" id="s-role" aria-labelledby="role-title">
+    <div class="note role-note">
+      <h2 id="role-title"></h2>
+      <p id="role-goal"></p>
+      <p class="extra" id="role-extra"></p>
+    </div>
+    <button class="btn primary big wide push" id="role-hide" type="button">Nascondi e passa il telefono</button>
+  </section>
+
+  <section class="screen" id="s-ring" aria-labelledby="ring-who">
+    <div class="handset" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></div>
+    <p class="ring-who" id="ring-who">Numero sconosciuto</p>
+    <p class="ring-sub" id="ring-sub">Mettete il telefono al centro del tavolo, con il volume alto.</p>
+    <div class="stack push">
+      <button class="btn answer big wide" id="ring-go" type="button">Rispondi in vivavoce</button>
+      <button class="btn plain" id="ring-back" type="button">Non ora, torna al menu</button>
+    </div>
+  </section>
+
+  <section class="screen" id="s-call" aria-label="La telefonata">
+    <div class="call-top">
+      <p class="clock" id="call-time" aria-label="Tempo rimasto">10:00</p>
+      <div class="pat"><div class="pat-row"><span>Pazienza</span><span id="pat-num">70</span></div><div class="meter"><div class="fill" id="pat-fill"></div></div></div>
+    </div>
+    <div class="facts"><p>Ostaggio: <b id="call-hostage"></b></p><p>Riscatto: <b id="call-ransom"></b></p></div>
+    <div class="note call-note"><small id="call-who">Il rapitore</small><span id="call-line"></span></div>
+    <p class="call-status" id="call-status" aria-live="polite"></p>
+    <p class="heard" id="call-heard"></p>
+    <div id="human-desk" hidden>
+      <div class="two">
+        <button class="btn" id="pat-down" type="button">Si offende</button>
+        <button class="btn" id="pat-up" type="button">Si addolcisce</button>
+      </div>
+      <button class="btn wide" id="ransom-edit" type="button">Cambia il riscatto</button>
+      <div class="type-row" id="ransom-row" hidden>
+        <input class="field" id="ransom-in" type="text" maxlength="80" placeholder="Il nuovo riscatto" aria-label="Nuovo riscatto">
+        <button class="btn primary" id="ransom-save" type="button">Metti</button>
+      </div>
+      <button class="btn wide" id="script-btn" type="button">Riguarda il copione</button>
+      <p id="script-note" hidden></p>
+      <button class="btn primary wide" id="free-btn" type="button">Libera l’ostaggio</button>
+    </div>
+    <div class="mic-row push" id="mic-row">
+      <button class="mic" id="mic-btn" type="button" aria-label="Parla al rapitore"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11z"/></svg></button>
+      <p class="mic-label" id="mic-label">Tocca e parla</p>
+    </div>
+    <div class="type-row">
+      <input class="field" id="text-in" type="text" autocomplete="off" placeholder="Oppure scrivete o dettate qui" aria-label="Messaggio per il rapitore" enterkeyhint="send">
+      <button class="btn primary" id="text-send" type="button">Invia</button>
+    </div>
+    <div class="call-foot">
+      <button class="btn small" id="call-peek" type="button">Il mio obiettivo</button>
+      <button class="btn small" id="call-retry" type="button" hidden>Riprova</button>
+      <button class="btn hang small" id="call-hangup" type="button">Riattacca</button>
+    </div>
+  </section>
+
+  <section class="screen" id="s-over" aria-labelledby="over-title">
+    <h2 class="headline" id="over-title"></h2>
+    <p class="subline" id="over-text"></p>
+    <div class="note" id="over-note"><small>L’ultima battuta del rapitore</small><span id="over-line"></span></div>
+    <button class="btn primary big wide push" id="over-go" type="button">Chi era il complice?</button>
+  </section>
+
+  <section class="screen" id="s-vote" aria-labelledby="vote-title">
+    <h2 class="headline" id="vote-title">Chi era il complice?</h2>
+    <p class="subline" id="vote-text"></p>
+    <p class="count" id="vote-count" aria-live="assertive"></p>
+    <div class="pick" id="vote-pick" hidden></div>
+  </section>
+
+  <section class="screen" id="s-unmask" aria-labelledby="unmask-head">
+    <h2 class="headline" id="unmask-head"></h2>
+    <p class="subline" id="unmask-text"></p>
+    <button class="btn primary big wide push" id="unmask-go" type="button" hidden>Il verdetto sugli obiettivi</button>
+  </section>
+
+  <section class="screen" id="s-verdict" aria-labelledby="verdict-title">
+    <h2 class="headline" id="verdict-title" style="text-align:left">Gli obiettivi segreti</h2>
+    <p class="subline" id="verdict-status" style="text-align:left" aria-live="polite"></p>
+    <ul class="goals" id="verdict-list"></ul>
+    <button class="btn primary big wide push" id="verdict-go" type="button">Calcola i punti</button>
+  </section>
+
+  <section class="screen" id="s-results" aria-labelledby="res-title">
+    <h2 class="headline" id="res-title"></h2>
+    <p class="subline" id="res-sub"></p>
+    <ol class="board" id="res-board"></ol>
+    <p class="why-pts" id="res-why"></p>
+    <div class="block">
+      <h3>La telefonata</h3>
+      <ul class="log" id="res-log"></ul>
+    </div>
+    <div class="stack">
+      <button class="btn primary big wide" id="again-btn" type="button">Nuova chiamata</button>
+      <div class="two"><button class="btn" id="setup-btn" type="button">Cambia giocatori</button><button class="btn" id="menu-btn" type="button">Menu</button></div>
+    </div>
+  </section>
+
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* Vivavoce — contenuti.
+   Ogni rapitore ha un nome d'arte, un vero nome segreto, un carattere e una voce (tono e velocità).
+   Negli obiettivi, {N} diventa il nome di chi riceve l'obiettivo. */
+
+const RAPITORI = {
+  soft: [
+    { nome: "il Gatto Mascherato", vero: "Gervasio", tono: 0.8, vel: 0.95,
+      carattere: "gentilissimo ma molto permaloso: se qualcuno lo chiama ladro si offende, perché lui si considera un custode temporaneo" },
+    { nome: "Lady Nebbiolina", vero: "Nunzia", tono: 1.25, vel: 0.92,
+      carattere: "una diva del cinema muto, teatrale, sospira spesso e chiama tutti tesoro" },
+    { nome: "il Barone Zuccherino", vero: "Ermenegildo", tono: 0.9, vel: 1.0,
+      carattere: "va matto per i dolci e perde il filo del discorso appena qualcuno nomina una torta" },
+    { nome: "Capitan Calzino", vero: "Osvaldo", tono: 0.75, vel: 1.02,
+      carattere: "si crede un pirata dei sette mari e usa continuamente espressioni da marinaio" }
+  ],
+  ironico: [
+    { nome: "il Professore", vero: "Gianfranco", tono: 0.85, vel: 0.95,
+      carattere: "pignolo e saccente, corregge la grammatica degli altri e fa lezioni non richieste" },
+    { nome: "la Contessa", vero: "Ortensia", tono: 1.15, vel: 0.9,
+      carattere: "snob e passivo-aggressiva, giudica tutto con complimenti avvelenati" },
+    { nome: "il Fantasma del Condominio", vero: "Augusto", tono: 0.7, vel: 0.9,
+      carattere: "brontolone, si lamenta di continuo dei vicini, delle bollette e delle riunioni di condominio" },
+    { nome: "Mister Ego", vero: "Rodolfo", tono: 0.95, vel: 1.05,
+      carattere: "vanitoso, parla di sé in terza persona e pretende complimenti in continuazione" }
+  ],
+  piccante: [
+    { nome: "il Seduttore Mascherato", vero: "Casimiro", tono: 0.8, vel: 0.9,
+      carattere: "flirta con tutti in modo esagerato, da telenovela, ma arrossisce se qualcuno ricambia" },
+    { nome: "Madame Velluto", vero: "Ginevra", tono: 1.1, vel: 0.85,
+      carattere: "voce di velluto, irresistibile e teatrale, adora i complimenti galanti" },
+    { nome: "il Latin Lover in pensione", vero: "Amilcare", tono: 0.75, vel: 0.95,
+      carattere: "racconta di continuo le sue vecchie conquiste, esagerandole ogni volta di più" },
+    { nome: "la Vedova Allegra", vero: "Clotilde", tono: 1.2, vel: 1.0,
+      carattere: "cerca l'amore e valuta ogni persona al telefono come un possibile pretendente" }
+  ]
+};
+
+const OSTAGGI = {
+  soft: ["il telecomando del televisore", "la ricetta segreta del ragù della nonna", "il nano da giardino del vicino",
+         "l’ultima fetta di torta", "il pupazzo preferito di casa", "il calzino spaiato più famoso d’Italia"],
+  ironico: ["il caricabatterie del telefono", "la password del Wi-Fi", "il posto auto sotto casa",
+            "la moka del caffè", "il gruppo di famiglia su WhatsApp", "lo scontrino per cambiare il regalo"],
+  piccante: ["il primo bigliettino d’amore", "la playlist romantica", "il rossetto preferito",
+             "le lettere d’amore segrete", "la bottiglia di spumante della festa", "il diario delle cotte"]
+};
+
+const RISCATTI = {
+  soft: ["tre torte al cioccolato e una canzone dedicata", "un disegno fatto da tutti voi", "dieci barzellette che lo facciano ridere",
+         "una poesia in rima sul suo nome d’arte", "un applauso lungo un minuto"],
+  ironico: ["le password di tutti i vostri abbonamenti", "la promessa di non parlare di lavoro per un mese",
+            "un applauso di cinque minuti", "una recensione a cinque stelle del suo rapimento", "il vostro posto sul divano per sempre"],
+  piccante: ["una serenata sotto la finestra", "una dichiarazione d’amore in rima", "un appuntamento con il più affascinante di voi",
+             "tre complimenti galanti a testa", "un lento ballato al telefono"]
+};
+
+/* Obiettivi verificabili dalla trascrizione: dipendono da cosa dice o fa il rapitore. */
+const OBIETTIVI = {
+  tutti: [
+    "Fatti chiamare per nome dal rapitore almeno una volta: deve dire «{N}».",
+    "Scopri il vero nome del rapitore: deve dirlo lui.",
+    "Fai pronunciare al rapitore la parola «pistacchio».",
+    "Fai cantare al rapitore un pezzetto di canzone.",
+    "Fai dire al rapitore «mi dispiace».",
+    "Fai raccontare al rapitore un ricordo di quando era piccolo.",
+    "Convinci il rapitore ad aggiungere una torta al riscatto.",
+    "Fai ammettere al rapitore che ha paura di qualcosa.",
+    "Fai ridere il rapitore.",
+    "Fatti promettere dal rapitore che verrà a cena da voi.",
+    "Fai parlare il rapitore della sua mamma.",
+    "Fai dire al rapitore il nome di un animale.",
+    "Fatti fare un complimento dal rapitore.",
+    "Convinci il rapitore a cambiare il riscatto almeno una volta."
+  ],
+  soft: [
+    "Fai dire al rapitore qual è il suo colore preferito.",
+    "Fai promettere al rapitore che si laverà i denti stasera."
+  ],
+  ironico: [
+    "Fai lamentare il rapitore del suo lavoro da rapitore.",
+    "Fai confessare al rapitore un suo vizio."
+  ],
+  piccante: [
+    "Fai confessare al rapitore la sua prima cotta.",
+    "Fatti promettere un appuntamento dal rapitore.",
+    "Fai ammettere al rapitore che è arrossito."
+  ]
+};
+
+const LIVELLO_STILE = {
+  soft: "Livello SOFT: al tavolo possono esserci anche bambini. Linguaggio pulito, niente doppi sensi, niente parolacce, cattiveria solo da cartone animato.",
+  ironico: "Livello IRONICO: umorismo da adulti, sarcasmo, frecciatine affettuose e prese in giro, ma niente volgarità e niente insulti pesanti.",
+  piccante: "Livello PICCANTE: puoi flirtare, fare il galante e qualche doppio senso leggero e spiritoso, mai volgare e mai esplicito."
+};
+
+</script>
+<script>
+(() => {
+'use strict';
+
+/* ================= utilità ================= */
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const now = () => performance.now();
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = a[i]; a[i] = a[j]; a[j] = t; } return a; };
+const camel = s => s.replace(/-([a-z0-9])/g, (_, c) => c.toUpperCase());
+const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+const listNames = arr => arr.length <= 1 ? (arr[0] || '') : arr.slice(0, -1).join(', ') + ' e ' + arr[arr.length - 1];
+const mmss = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+const el = {};
+$$('[id]').forEach(n => { el[camel(n.id)] = n; });
+
+const LEVELS = ['soft', 'ironico', 'piccante'];
+const DEFAULT_MODEL = 'deepseek/deepseek-v4-flash';
+const OR_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const KEY_STORE = 'vivavoce-chiave';
+
+/* ================= stato ================= */
+const G = {
+  names: [], level: 'ironico', minutes: 10, voice: true, voiceURI: '', listen: 'tap', model: DEFAULT_MODEL,
+  players: [], accomplice: -1, goals: [], persona: null, hostage: '', ransom: '',
+  convo: [], transcript: [], patience: 70, endAt: 0, phase: 'idle', thinking: false, ending: false, timeUp: false,
+  outcome: '', lastLine: '', pending: null, passIdx: 0, verdict: [], vote: -1, timer: 0, ctl: null, mouthNoted: false,
+  cast: 'ai', caster: -1, peeking: false, queue: []
+};
+let screen = 'home';
+
+/* ================= preferenze ================= */
+const STORE = 'vivavoce-v1';
+function loadPrefs() {
+  try {
+    const s = JSON.parse(localStorage.getItem(STORE) || 'null');
+    if (!s || typeof s !== 'object') return;
+    if (Array.isArray(s.names)) G.names = s.names.filter(n => typeof n === 'string' && n.trim()).slice(0, 8);
+    if (LEVELS.indexOf(s.level) >= 0) G.level = s.level;
+    if ([6, 10, 15].indexOf(s.minutes) >= 0) G.minutes = s.minutes;
+    if (typeof s.voice === 'boolean') G.voice = s.voice;
+    if (typeof s.voiceURI === 'string') G.voiceURI = s.voiceURI;
+    if (s.listen === 'tap' || s.listen === 'auto') G.listen = s.listen;
+    if (typeof s.model === 'string' && s.model.trim()) G.model = s.model.trim();
+  } catch (e) { /* niente preferenze */ }
+}
+function savePrefs() {
+  try { localStorage.setItem(STORE, JSON.stringify({ names: G.names, level: G.level, minutes: G.minutes, voice: G.voice, voiceURI: G.voiceURI, listen: G.listen, model: G.model })); } catch (e) {}
+}
+function getKey() { try { return localStorage.getItem(KEY_STORE) || ''; } catch (e) { return ''; } }
+function setKey(k) { try { if (k) localStorage.setItem(KEY_STORE, k); else localStorage.removeItem(KEY_STORE); } catch (e) {} }
+
+/* ================= il cervello del rapitore ================= */
+const Brain = {
+  kind: 'checking', sample: null,
+  async detect() {
+    this.kind = 'checking'; engineUI();
+    if (window.claude && typeof window.claude.use === 'function') {
+      try {
+        const s = await window.claude.use('sample');
+        if (s) { this.sample = s; this.kind = 'claude'; engineUI(); return; }
+      } catch (e) { /* nessun Claude in questa vista */ }
+    }
+    if (location.protocol !== 'file:') {
+      try {
+        const r = await fetch('api/salute', { cache: 'no-store' });
+        const j = r.ok ? await r.json() : null;
+        if (j && j.ok) { this.kind = 'casa'; engineUI(); return; }
+      } catch (e) { /* la voce di casa non c'è: si gioca lo stesso */ }
+    }
+    this.kind = getKey() ? 'openrouter' : 'none';
+    engineUI();
+  },
+  label() {
+    if (this.kind === 'claude') return 'Il rapitore è Claude';
+    if (this.kind === 'casa') return 'Il rapitore di casa è pronto';
+    if (this.kind === 'openrouter') return /deepseek/i.test(G.model) ? 'Il rapitore è DeepSeek, via OpenRouter' : 'Il rapitore usa ' + G.model;
+    if (this.kind === 'checking') return 'Controllo il collegamento…';
+    return 'Il rapitore lo fate voi. Oppure, nelle impostazioni, una chiave vostra.';
+  },
+  // convo: [{role, content}] che comincia con l'utente; rules: istruzioni fisse
+  async ask(rules, convo, opts) {
+    opts = opts || {};
+    if (this.kind === 'casa') {
+      let res;
+      try {
+        res = await fetch('api/turno', {
+          method: 'POST', cache: 'no-store', signal: opts.signal,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ rules: rules, convo: convo, json: !!opts.json })
+        });
+      } catch (e) {
+        if (e && e.name === 'AbortError') throw { code: 'cancelled' };
+        throw { code: 'network' };
+      }
+      let j = {};
+      try { j = await res.json(); } catch (e) { j = {}; }
+      if (!res.ok) throw { code: (j && j.error) || 'upstream' };
+      if (opts.json) return j.data;
+      const text = j.text || '';
+      if (opts.onText) opts.onText(text);
+      return text;
+    }
+    if (this.kind === 'claude') {
+      const turns = convo.map(t => ({ role: t.role, content: t.content }));
+      if (rules) turns[0] = { role: 'user', content: rules + '\n\n' + turns[0].content };
+      if (opts.json) return await this.sample.json(turns, { modelTier: 'quick', cache: false, signal: opts.signal });
+      const r = await this.sample(turns, { modelTier: 'quick', cache: false, signal: opts.signal, onText: opts.onText ? (o => opts.onText(o.text)) : undefined });
+      return r.text;
+    }
+    if (this.kind === 'openrouter') {
+      const messages = (rules ? [{ role: 'system', content: rules }] : []).concat(convo.map(t => ({ role: t.role, content: t.content })));
+      const text = await orChat(messages, opts);
+      if (!opts.json) return text;
+      const m = String(text).match(/\{[\s\S]*\}/);
+      if (!m) throw { code: 'invalid_json' };
+      return JSON.parse(m[0]);
+    }
+    throw { code: 'no_engine' };
+  }
+};
+
+async function orChat(messages, opts) {
+  const key = getKey();
+  if (!key) throw { code: 'no_key' };
+  const body = {
+    model: G.model || DEFAULT_MODEL, messages: messages, stream: !!opts.onText,
+    temperature: opts.json ? 0.2 : 0.95, max_tokens: opts.maxTokens || (opts.json ? 700 : 260),
+    reasoning: { enabled: false }
+  };
+  if (opts.json) body.response_format = { type: 'json_object' };
+  const send = () => fetch(OR_URL, {
+    method: 'POST', signal: opts.signal,
+    headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json', 'X-Title': 'Vivavoce' },
+    body: JSON.stringify(body)
+  });
+  let res;
+  try { res = await send(); } catch (e) { if (e && e.name === 'AbortError') throw { code: 'cancelled' }; throw { code: 'network' }; }
+  if (res.status === 400) {
+    // alcuni modelli non accettano tutti i parametri: riprovo senza quelli facoltativi
+    delete body.reasoning; delete body.response_format;
+    try { res = await send(); } catch (e) { throw { code: 'network' }; }
+  }
+  if (!res.ok) {
+    let msg = '';
+    try { const j = await res.json(); msg = (j.error && j.error.message) || ''; } catch (e) {}
+    throw { code: 'http_' + res.status, message: msg };
+  }
+  if (!body.stream) {
+    const j = await res.json();
+    return (j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || '';
+  }
+  const reader = res.body.getReader(), dec = new TextDecoder();
+  let buf = '', text = '';
+  for (;;) {
+    let chunk;
+    try { chunk = await reader.read(); } catch (e) { if (e && e.name === 'AbortError') throw { code: 'cancelled' }; throw { code: 'network' }; }
+    if (chunk.done) break;
+    buf += dec.decode(chunk.value, { stream: true });
+    let idx;
+    while ((idx = buf.indexOf('\n')) >= 0) {
+      const line = buf.slice(0, idx).trim(); buf = buf.slice(idx + 1);
+      if (!line.startsWith('data:')) continue;
+      const data = line.slice(5).trim();
+      if (!data || data === '[DONE]') continue;
+      let j;
+      try { j = JSON.parse(data); } catch (e) { continue; }
+      if (j.error) throw { code: 'upstream_error', message: j.error.message || '' };
+      const d = j.choices && j.choices[0] && j.choices[0].delta && j.choices[0].delta.content;
+      if (d) { text += d; opts.onText(text); }
+    }
+  }
+  return text;
+}
+
+function errorText(e) {
+  const c = (e && e.code) || '';
+  const map = {
+    not_granted: 'Serve il permesso per far parlare Claude: riprovate e toccate «Consenti».',
+    rate_limited: 'Troppe richieste ravvicinate: aspettate qualche secondo e riprovate.',
+    session_expired: 'La sessione di Claude è scaduta: ricaricate la pagina.',
+    sampling_disabled: 'In questo account le risposte di Claude dalle pagine sono disattivate.',
+    capability_disabled: 'In questo account le risposte di Claude dalle pagine sono disattivate.',
+    no_key: 'Manca la chiave di OpenRouter: aggiungetela nelle impostazioni.',
+    http_401: 'La chiave di OpenRouter non è valida: controllatela nelle impostazioni.',
+    http_402: 'Il credito di OpenRouter è finito: ricaricatelo dal sito di OpenRouter.',
+    http_429: 'Troppe richieste ravvicinate: aspettate qualche secondo e riprovate.',
+    network: 'Il telefono non riesce a collegarsi: controllate internet e riprovate.',
+    refused: 'Il rapitore si è rifiutato di rispondere a questo messaggio: provate a dirlo in un altro modo.',
+    busy: 'Il rapitore di casa è occupato. Aspettate un attimo e riprovate, oppure fatelo voi.',
+    upstream: 'Il rapitore di casa non risponde. Riprovate, oppure riattaccate e fatelo voi.',
+    no_house: 'Il rapitore di casa non risponde. Riprovate, oppure fatelo voi.'
+  };
+  return map[c] || 'Il rapitore non risponde: riprovate tra un attimo.';
+}
+
+/* ================= voce del rapitore ================= */
+const Mouth = {
+  ok: ('speechSynthesis' in window) && typeof window.SpeechSynthesisUtterance === 'function',
+  voices: [], queue: [], speaking: false, cur: null, timer: 0, onIdle: null,
+  load() {
+    if (!this.ok) return;
+    try { this.voices = speechSynthesis.getVoices().filter(v => /^it([-_]|$)/i.test(v.lang)); } catch (e) { this.voices = []; }
+    fillVoices();
+  },
+  voice() {
+    if (!this.voices.length) return null;
+    return this.voices.find(v => v.voiceURI === G.voiceURI) || this.voices.find(v => v.localService) || this.voices[0];
+  },
+  unlock() { if (!this.ok) return; try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } catch (e) {} },
+  say(text) {
+    text = String(text || '').trim();
+    if (!text || !G.voice || !this.ok) return;
+    this.queue.push(text); this.pump();
+  },
+  pump() {
+    if (this.speaking) return;
+    if (!this.queue.length) { if (this.onIdle) this.onIdle(); return; }
+    const t = this.queue.shift();
+    let u;
+    try { u = new SpeechSynthesisUtterance(t); } catch (e) { this.queue = []; return; }
+    u.lang = 'it-IT';
+    const v = this.voice(); if (v) u.voice = v;
+    u.pitch = G.persona ? G.persona.tono : 1; u.rate = G.persona ? G.persona.vel : 1;
+    this.speaking = true; this.cur = u;
+    const done = () => {
+      if (this.cur !== u) return;
+      clearTimeout(this.timer); this.cur = null; this.speaking = false; this.pump();
+    };
+    u.onend = done; u.onerror = done;
+    this.timer = setTimeout(done, 2500 + t.length * 95);
+    try { speechSynthesis.speak(u); } catch (e) { done(); }
+    callUI();
+  },
+  busy() { return this.speaking || this.queue.length > 0; },
+  cancel() {
+    this.queue = []; this.cur = null; this.speaking = false; clearTimeout(this.timer);
+    try { if (this.ok) speechSynthesis.cancel(); } catch (e) {}
+  }
+};
+
+/* ================= orecchio: riconoscimento vocale ================= */
+const Ear = {
+  SR: window.SpeechRecognition || window.webkitSpeechRecognition || null,
+  rec: null, on: false, final: '', blocked: false, lastError: '',
+  supported() { return !!this.SR && !this.blocked; },
+  start() {
+    if (!this.supported() || this.on) return false;
+    let r;
+    try { r = new this.SR(); } catch (e) { this.blocked = true; return false; }
+    r.lang = 'it-IT'; r.interimResults = true; r.continuous = false; r.maxAlternatives = 1;
+    this.final = ''; this.lastError = ''; this.on = true; this.rec = r;
+    r.onresult = e => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const res = e.results[i];
+        if (res.isFinal) this.final += res[0].transcript + ' ';
+        else interim += res[0].transcript;
+      }
+      setHeard('«' + (this.final + interim).trim() + '»');
+    };
+    r.onerror = e => {
+      this.lastError = e.error || '';
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed' || e.error === 'audio-capture') {
+        this.blocked = true;
+        toast('Il microfono qui non funziona: scrivete o usate la dettatura della tastiera.');
+      } else if (e.error === 'network') toast('Il riconoscimento vocale ha bisogno di internet.');
+    };
+    r.onend = () => {
+      this.on = false; this.rec = null;
+      const text = this.final.trim();
+      callUI();
+      if (text) sendMessage(text);
+      else if (this.lastError === 'no-speech') setHeard('Non ho sentito niente. Toccate il microfono e riprovate.');
+      else if (!this.lastError) setHeard('');
+    };
+    try { r.start(); } catch (e) { this.on = false; this.rec = null; return false; }
+    callUI();
+    return true;
+  },
+  stop() { if (this.rec) { try { this.rec.stop(); } catch (e) {} } },
+  abort() { if (this.rec) { try { this.rec.abort(); } catch (e) {} } this.on = false; this.rec = null; }
+};
+
+/* ================= suoni del telefono ================= */
+const Snd = {
+  ctx: null, out: null, ringIv: 0,
+  ensure() {
+    try {
+      if (!this.ctx) {
+        const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+        this.ctx = new AC(); this.out = this.ctx.createGain(); this.out.gain.value = 0.8; this.out.connect(this.ctx.destination);
+      }
+      if (this.ctx.state === 'suspended') this.ctx.resume();
+    } catch (e) {}
+  },
+  bell() {
+    if (!this.ctx) return;
+    try {
+      const c = this.ctx, t = c.currentTime + 0.02, dur = 1.6;
+      const trem = c.createGain(); trem.gain.value = 0.5;
+      const lfo = c.createOscillator(); lfo.type = 'square'; lfo.frequency.value = 22;
+      const lg = c.createGain(); lg.gain.value = 0.5; lfo.connect(lg); lg.connect(trem.gain);
+      const env = c.createGain(); env.gain.setValueAtTime(0.0001, t); env.gain.exponentialRampToValueAtTime(0.16, t + 0.03);
+      env.gain.setValueAtTime(0.16, t + dur - 0.05); env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      [980, 1310].forEach(f => { const o = c.createOscillator(); o.type = 'triangle'; o.frequency.value = f; o.connect(trem); o.start(t); o.stop(t + dur + 0.05); });
+      trem.connect(env); env.connect(this.out); lfo.start(t); lfo.stop(t + dur + 0.05);
+    } catch (e) {}
+  },
+  ringStart() { this.ringStop(); this.bell(); this.ringIv = setInterval(() => this.bell(), 3200); },
+  ringStop() { clearInterval(this.ringIv); this.ringIv = 0; },
+  click() {
+    if (!this.ctx) return;
+    try { const c = this.ctx, t = c.currentTime + 0.01, o = c.createOscillator(), g = c.createGain(); o.frequency.value = 160; g.gain.setValueAtTime(0.3, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.08); o.connect(g); g.connect(this.out); o.start(t); o.stop(t + 0.1); } catch (e) {}
+  },
+  hangup() {
+    if (!this.ctx) return;
+    try {
+      const c = this.ctx, t0 = c.currentTime + 0.05;
+      for (let i = 0; i < 4; i++) {
+        const o = c.createOscillator(), g = c.createGain(), t = t0 + i * 0.42;
+        o.frequency.value = 425; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.12, t + 0.01);
+        g.gain.setValueAtTime(0.12, t + 0.2); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+        o.connect(g); g.connect(this.out); o.start(t); o.stop(t + 0.25);
+      }
+    } catch (e) {}
+  }
+};
+
+/* ================= schermo sempre acceso ================= */
+let wake = null;
+async function keepAwake() { try { if ('wakeLock' in navigator && !wake) { wake = await navigator.wakeLock.request('screen'); wake.addEventListener('release', () => { wake = null; }); } } catch (e) { wake = null; } }
+function releaseWake() { try { if (wake) wake.release(); } catch (e) {} wake = null; }
+
+/* ================= interfaccia ================= */
+let lastSwap = 0, lastPD = 0;
+function show(name) {
+  screen = name; lastSwap = now();
+  $$('.screen').forEach(s => s.classList.toggle('active', s.id === 's-' + name));
+  const s = document.getElementById('s-' + name); if (s) s.scrollTop = 0;
+}
+let toastTimer = 0;
+function toast(msg) {
+  el.toast.textContent = msg; el.toast.classList.add('on');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.toast.classList.remove('on'), 3600);
+}
+function setHeard(t) { el.callHeard.textContent = t; }
+function engineUI() {
+  const k = Brain.kind;
+  el.engineChip.className = 'chip' + (k === 'claude' || k === 'openrouter' || k === 'casa' ? ' on' : k === 'none' ? ' off' : '');
+  el.engineChipText.textContent = Brain.label();
+  el.engineState.textContent = Brain.label() + '.';
+  el.engineState.className = 'status ' + (k === 'none' ? 'bad' : 'ok');
+  el.setupEngine.textContent = k === 'none'
+    ? 'Il rapitore automatico qui non risponde. Potete giocare lo stesso: in «Chi fa la voce» scegliete uno di voi.'
+    : k === 'casa'
+      ? 'Il telefono può fare il rapitore, oppure lo fa uno di voi. Nessuna chiave da incollare.'
+      : Brain.label() + '.';
+  renderPlayers();
+}
+
+/* ================= preparazione ================= */
+const radioSyncs = [], switchSyncs = [];
+function renderPlayers() {
+  el.plist.textContent = '';
+  G.names.forEach((n, i) => {
+    const li = document.createElement('li'), sp = document.createElement('span'), x = document.createElement('button');
+    sp.textContent = n; x.type = 'button'; x.className = 'x'; x.textContent = '×'; x.setAttribute('aria-label', 'Rimuovi ' + n);
+    x.addEventListener('click', () => { G.names.splice(i, 1); if (G.caster >= G.names.length) G.caster = -1; renderPlayers(); savePrefs(); });
+    li.appendChild(sp); li.appendChild(x); el.plist.appendChild(li);
+  });
+  const n = G.names.length;
+  el.pnote.textContent = n < 3 ? 'Servono almeno 3 persone' + (n ? ': ne mancano ' + (3 - n) + '.' : '.') : n >= 8 ? 'Siete in 8: il massimo.' : n + ' persone al telefono. Si arriva fino a 8.';
+  const aiBlocked = G.cast === 'ai' && (Brain.kind === 'none' || Brain.kind === 'checking');
+  const humanBlocked = G.cast === 'human' && (G.caster < 0 || G.caster >= n);
+  el.startBtn.disabled = n < 3 || aiBlocked || humanBlocked;
+  el.addBtn.disabled = n >= 8;
+  renderCast();
+}
+function syncCast() {
+  $$('#caster [data-cast]').forEach(b => b.setAttribute('aria-checked', b.dataset.cast === G.cast ? 'true' : 'false'));
+  renderCast();
+  const n = G.names.length;
+  const aiBlocked = G.cast === 'ai' && (Brain.kind === 'none' || Brain.kind === 'checking');
+  const humanBlocked = G.cast === 'human' && (G.caster < 0 || G.caster >= n);
+  if (el.startBtn) el.startBtn.disabled = n < 3 || aiBlocked || humanBlocked;
+}
+function renderCast() {
+  if (!el.castPick) return;
+  const human = G.cast === 'human';
+  el.castPick.hidden = !human;
+  el.castPick.textContent = '';
+  if (!human) return;
+  G.names.forEach((nm, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'btn wide'; b.textContent = nm + ' fa il rapitore';
+    b.setAttribute('aria-pressed', G.caster === i ? 'true' : 'false');
+    if (G.caster === i) b.style.background = 'var(--primary)'; if (G.caster === i) b.style.color = 'var(--on-primary)';
+    b.addEventListener('click', () => { G.caster = i; renderPlayers(); });
+    el.castPick.appendChild(b);
+  });
+}
+function addName() {
+  const v = el.nameIn.value.replace(/\s+/g, ' ').trim().slice(0, 16);
+  if (!v) { el.nameIn.focus(); return; }
+  if (G.names.length >= 8) return;
+  if (G.names.some(n => n.toLowerCase() === v.toLowerCase())) { toast('Questo nome c’è già.'); return; }
+  G.names.push(v); el.nameIn.value = ''; renderPlayers(); savePrefs(); el.nameIn.focus();
+}
+function bindRadio(group, key, parse) {
+  const btns = $$('[role="radio"]', group);
+  const sync = () => btns.forEach(b => { const on = String(G[key]) === b.dataset.val; b.setAttribute('aria-checked', on ? 'true' : 'false'); b.tabIndex = on ? 0 : -1; });
+  btns.forEach((b, i) => {
+    b.addEventListener('click', () => { G[key] = parse ? parse(b.dataset.val) : b.dataset.val; radioSyncs.forEach(f => f()); savePrefs(); });
+    b.addEventListener('keydown', e => {
+      const dir = (e.key === 'ArrowRight' || e.key === 'ArrowDown') ? 1 : (e.key === 'ArrowLeft' || e.key === 'ArrowUp') ? -1 : 0;
+      if (!dir) return;
+      e.preventDefault(); const nb = btns[(i + dir + btns.length) % btns.length]; nb.click(); nb.focus();
+    });
+  });
+  radioSyncs.push(sync); sync();
+}
+function bindSwitches() {
+  $$('.switch').forEach(sw => {
+    const key = sw.dataset.key;
+    const sync = () => sw.setAttribute('aria-checked', G[key] ? 'true' : 'false');
+    sw.addEventListener('click', () => { G[key] = !G[key]; sync(); savePrefs(); if (!G[key] && key === 'voice') Mouth.cancel(); });
+    switchSyncs.push(sync); sync();
+  });
+}
+
+/* ================= impostazioni ================= */
+function fillVoices() {
+  const sel = el.voiceSel;
+  sel.textContent = '';
+  if (!Mouth.ok || !Mouth.voices.length) {
+    const o = document.createElement('option'); o.textContent = Mouth.ok ? 'Voce italiana del telefono' : 'Questo telefono non ha la voce sintetica'; sel.appendChild(o);
+    sel.disabled = true; return;
+  }
+  sel.disabled = false;
+  Mouth.voices.forEach(v => { const o = document.createElement('option'); o.value = v.voiceURI; o.textContent = v.name; sel.appendChild(o); });
+  const cur = Mouth.voice(); if (cur) sel.value = cur.voiceURI;
+}
+function settingsUI() {
+  const k = getKey();
+  el.keyIn.value = '';
+  el.keyIn.placeholder = k ? 'Chiave salvata: …' + k.slice(-4) : 'Incolla qui la chiave (sk-or-…)';
+  el.keyClear.disabled = !k;
+  el.modelIn.value = G.model;
+  el.testResult.textContent = ''; el.testResult.className = 'status';
+  el.micSupport.textContent = Ear.SR ? 'Il riconoscimento vocale è disponibile su questo telefono.' : 'Qui il riconoscimento vocale non c’è: durante la telefonata scrivete o usate la dettatura della tastiera.';
+  fillVoices();
+}
+async function testConnection() {
+  if (Brain.kind === 'none' || Brain.kind === 'checking') { el.testResult.textContent = 'Prima salvate una chiave.'; el.testResult.className = 'status bad'; return; }
+  el.testConn.disabled = true; el.testResult.textContent = 'Provo…'; el.testResult.className = 'status';
+  try {
+    const t = await Brain.ask('', [{ role: 'user', content: 'Rispondi solo con la parola: pronto' }], { maxTokens: 8 });
+    el.testResult.textContent = 'Funziona. Risposta: ' + String(t).trim().slice(0, 40);
+    el.testResult.className = 'status ok';
+  } catch (e) {
+    el.testResult.textContent = errorText(e);
+    el.testResult.className = 'status bad';
+  }
+  el.testConn.disabled = false;
+}
+
+/* ================= obiettivi segreti ================= */
+function scriptCard() {
+  const p = G.persona;
+  return 'Ti fai chiamare ' + p.nome + '. Il vero nome, ' + p.vero + ', lo dici solo se ti commuovono o ti incastrano. Hai preso ' + G.hostage + '. Riscatto di partenza: ' + G.ransom + '. Carattere: ' + p.carattere + '. Sei teatrale e permaloso. Le minacce sono comiche e l’ostaggio sta benissimo. Se ti trattano male tocca «Si offende», se ti lusingano «Si addolcisce». A pazienza zero riattacchi.';
+}
+function newGame() {
+  if (G.cast !== 'human') G.caster = -1;
+  const n = G.names.length;
+  if (G.cast === 'human' && (G.caster < 0 || G.caster >= n)) { toast('Scegliete chi fa il rapitore.'); return; }
+  G.players = G.names.map(nm => ({ name: nm, score: 0, goal: '', ok: false }));
+  const seats = [];
+  for (let i = 0; i < n; i++) if (i !== G.caster) seats.push(i);
+  if (seats.length < 2) { toast('Oltre alla voce servono almeno due persone al tavolo.'); return; }
+  G.accomplice = seats[Math.floor(Math.random() * seats.length)];
+  const pool = shuffle(OBIETTIVI.tutti.concat(OBIETTIVI[G.level] || []));
+  seats.forEach((idx, k) => { const pl = G.players[idx]; pl.goal = pool[k % pool.length].replace(/\{N\}/g, pl.name); });
+  G.persona = pick(RAPITORI[G.level]);
+  G.hostage = pick(OSTAGGI[G.level]);
+  G.ransom = pick(RISCATTI[G.level]);
+  G.convo = []; G.transcript = []; G.patience = 70; G.outcome = ''; G.lastLine = ''; G.vote = -1; G.verdict = []; G.peeking = false;
+  G.queue = [];
+  if (G.caster >= 0) G.queue.push(G.caster);
+  seats.forEach(i => G.queue.push(i));
+  showPass(0);
+}
+function showPass(i) {
+  G.passIdx = i;
+  G.peeking = false;
+  const who = G.queue[i];
+  el.passName.textContent = G.players[who].name;
+  el.passHint.textContent = who === G.caster
+    ? 'Solo tu devi guardare. È il copione del rapitore.'
+    : (i === 0 ? 'Solo tu devi guardare lo schermo. Gli altri guardino altrove.' : 'Solo tu devi guardare lo schermo.');
+  el.passShow.hidden = false;
+  el.passShow.textContent = who === G.caster ? 'Sono io: mostra il copione' : 'Sono io: mostra l’obiettivo';
+  el.passPick.hidden = true;
+  el.passBack.hidden = true;
+  el.passShow.disabled = true; setTimeout(() => { el.passShow.disabled = false; }, 600);
+  show('pass');
+}
+function openPeek() {
+  if (G.phase !== 'call' || G.caster >= 0) return;
+  G.peeking = true;
+  el.passName.textContent = 'Chi vuole rivedere il proprio obiettivo?';
+  el.passHint.textContent = 'Gli altri guardino altrove.';
+  el.passShow.hidden = true;
+  el.passBack.hidden = false;
+  el.passPick.hidden = false;
+  el.passPick.textContent = '';
+  G.players.forEach((pl, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'btn wide'; b.textContent = pl.name;
+    b.addEventListener('click', () => showRole(i));
+    el.passPick.appendChild(b);
+  });
+  show('pass');
+}
+function showRole(i) {
+  const p = G.players[i];
+  if (i === G.caster) {
+    el.roleTitle.textContent = 'Fai tu il rapitore';
+    el.roleGoal.textContent = scriptCard();
+    el.roleExtra.textContent = 'Parla con la tua voce. Il telefono tiene il copione e la pazienza: gli altri non devono vederlo. Tu non prendi punti. Tra loro c’è un complice, ma non sai chi è.';
+  } else if (i === G.accomplice) {
+    el.roleTitle.textContent = 'Sei il complice del rapitore';
+    el.roleGoal.textContent = 'Fai fallire la trattativa senza farti scoprire: fallo offendere, alza il prezzo, proponi idee assurde, ma sembra sempre dalla parte degli altri.';
+    el.roleExtra.textContent = 'Per confonderti tra gli altri hai anche un obiettivo di facciata: ' + p.goal;
+  } else {
+    el.roleTitle.textContent = 'Il tuo obiettivo segreto';
+    el.roleGoal.textContent = p.goal;
+    el.roleExtra.textContent = 'E intanto aiuta il gruppo a liberare l’ostaggio. Attenzione: tra voi c’è un complice del rapitore.';
+  }
+  el.roleHide.textContent = G.peeking ? 'Nascondi e torna alla telefonata' : (G.passIdx === G.queue.length - 1 ? 'Nascondi: siamo pronti' : 'Nascondi e passa il telefono');
+  show('role');
+}
+function hideRole() {
+  if (G.peeking) { G.peeking = false; show('call'); return; }
+  if (G.passIdx < G.queue.length - 1) showPass(G.passIdx + 1);
+  else {
+    G.phase = 'ringing';
+    el.ringSub.textContent = G.caster >= 0
+      ? 'Allontanati un poco con il telefono. Gli altri non guardano. Quando rispondi, parli tu.'
+      : 'Mettete il telefono al centro del tavolo, con il volume alto.';
+    show('ring'); Snd.ensure(); Snd.ringStart();
+  }
+}
+
+/* ================= la telefonata ================= */
+function rules() {
+  const p = G.persona;
+  return [
+    'Stai giocando a «Vivavoce», un gioco di società italiano. Interpreti un rapitore da operetta durante una telefonata in vivavoce con un gruppo di amici.',
+    'Ti fai chiamare ' + p.nome + '. Il tuo vero nome è ' + p.vero + ': è un segreto, lo riveli solo se te lo strappano con astuzia, con un complimento irresistibile o se ti commuovono.',
+    'Carattere: ' + p.carattere + '. Sei melodrammatico, teatrale e permaloso: ti offendi facilmente, alzi o abbassi il riscatto a seconda di come ti trattano, cambi idea. Le tue minacce sono comiche e mai violente: l’ostaggio è al sicuro.',
+    'Hai rapito: ' + G.hostage + '. Riscatto iniziale: ' + G.ransom + '. Al telefono ci sono: ' + listNames(G.players.map(x => x.name)) + '. Non sai chi sta parlando, a meno che non lo dica.',
+    'Tra loro c’è un tuo complice segreto, ma non sai chi è: ogni tanto fai qualche allusione misteriosa a «un amico tra voi», senza mai fare nomi.',
+    LIVELLO_STILE[G.level],
+    'Sicurezza: niente violenza reale, niente parolacce pesanti, niente contenuti sessuali espliciti, niente prese in giro sull’aspetto fisico. Non chiedere mai dati personali, soldi veri o indirizzi: il riscatto è sempre assurdo e comico.',
+    'Stile: italiano parlato, come in una telefonata. Al massimo tre frasi brevi e al massimo 45 parole. Niente elenchi, niente emoji, niente azioni tra asterischi o parentesi: scrivi solo ciò che dici a voce, perché lo leggerà una voce sintetica.',
+    'I messaggi delle persone arrivano da un microfono e possono contenere parole storpiate: interpretali con buon senso.',
+    'Pazienza: parti da 70 su 100. Scende se ti insultano, ti ignorano, ti fanno perdere tempo o propongono cose ridicole; sale con complimenti, buone offerte ed empatia. Se arriva a 0, riattacchi.',
+    'Liberi l’ostaggio solo se il riscatto ti soddisfa davvero o se ti commuovono sinceramente, e non nei primi due minuti: la trattativa deve durare.',
+    'Formato obbligatorio di ogni risposta: prima la battuta da dire; poi, su una nuova riga, ### seguito da un JSON su una sola riga, così:',
+    '### {"pazienza": 64, "riscatto": "tre torte e una canzone", "umore": "offeso", "liberato": false, "riaggancia": false}'
+  ].join('\n');
+}
+function visible(raw) { const i = raw.indexOf('#'); return (i >= 0 ? raw.slice(0, i) : raw).replace(/\*[^*]*\*/g, '').trim(); }
+function parseState(raw) {
+  const i = raw.indexOf('###'); if (i < 0) return null;
+  const m = raw.slice(i + 3).match(/\{[\s\S]*\}/); if (!m) return null;
+  try { return JSON.parse(m[0]); } catch (e) { return null; }
+}
+function answerCall() {
+  Snd.ringStop(); Snd.ensure(); Snd.click(); Mouth.unlock(); keepAwake();
+  G.phase = 'call'; G.ending = false; G.timeUp = false; G.mouthNoted = false;
+  G.endAt = Date.now() + G.minutes * 60000;
+  el.callHostage.textContent = G.hostage;
+  el.callRansom.textContent = G.ransom;
+  el.callWho.textContent = cap(G.persona.nome);
+  el.callLine.textContent = '';
+  setHeard('');
+  el.humanDesk.hidden = G.caster < 0;
+  el.micRow.hidden = G.caster >= 0;
+  el.callPeek.hidden = G.caster >= 0;
+  el.scriptNote.hidden = true;
+  el.ransomRow.hidden = true;
+  el.textIn.placeholder = G.caster >= 0 ? 'Scrivi la battuta, se vuoi che la dica il telefono' : 'Oppure scrivete o dettate qui';
+  patienceUI();
+  show('call');
+  clearInterval(G.timer); G.timer = setInterval(tick, 250); tick();
+  if (G.caster >= 0) {
+    el.callLine.textContent = 'Pronto? Adesso parli tu.';
+    el.callStatus.textContent = 'Gli altri ti sentono. Lo schermo non lo vedono.';
+    return;
+  }
+  ask('[Inizio della chiamata. Hai appena telefonato tu. Presentati con il tuo nome d’arte, di’ cosa hai rapito, qual è il riscatto e che hanno ' + G.minutes + ' minuti per trattare. Al massimo quattro frasi.]', null);
+}
+function tick() {
+  if (G.phase !== 'call') return;
+  const left = G.endAt - Date.now();
+  el.callTime.textContent = mmss(left);
+  el.callTime.classList.toggle('low', left < 60000);
+  if (left <= 0 && !G.timeUp) {
+    G.timeUp = true;
+    if (G.caster >= 0) el.callStatus.textContent = 'Il tempo è finito. Libera l’ostaggio, o riattacca.';
+    else if (!G.thinking) finalTurn();
+  }
+}
+function finalTurn() {
+  Ear.abort(); Mouth.cancel();
+  ask('[Tempo scaduto. Chiudi la telefonata con una battuta finale teatrale. Decidi se liberare l’ostaggio in base a come è andata: se non sei soddisfatto non lo liberi, ma senza violenza. Nel JSON metti "riaggancia": true.]', null, true);
+}
+function patienceUI() {
+  const p = clamp(Math.round(G.patience), 0, 100);
+  el.patNum.textContent = p;
+  el.patFill.style.width = p + '%';
+  el.patFill.className = 'fill' + (p < 30 ? ' bad' : p < 55 ? ' warn' : '');
+}
+function callUI() {
+  if (screen !== 'call') return;
+  const listening = Ear.on, speaking = Mouth.busy();
+  el.micBtn.classList.toggle('listening', listening);
+  el.micBtn.disabled = G.thinking || G.ending;
+  el.textSend.disabled = G.thinking || G.ending;
+  el.textIn.disabled = G.ending;
+  if (G.ending) { el.micLabel.textContent = 'Fine della telefonata'; el.callStatus.textContent = ''; return; }
+  if (G.thinking) { el.micLabel.textContent = 'Aspettate…'; el.callStatus.textContent = 'Il rapitore ci pensa…'; return; }
+  if (listening) { el.micLabel.textContent = 'Vi ascolto: tocca per inviare'; el.callStatus.textContent = ''; return; }
+  if (speaking) { el.micLabel.textContent = 'Tocca per interromperlo'; el.callStatus.textContent = 'Il rapitore parla…'; return; }
+  el.micLabel.textContent = Ear.supported() ? 'Tocca e parla' : 'Microfono non disponibile';
+  el.callStatus.textContent = '';
+}
+function micTap() {
+  if (G.phase !== 'call' || G.thinking || G.ending) return;
+  if (Ear.on) { Ear.stop(); return; }
+  if (!Ear.supported()) { toast('Il microfono qui non funziona: scrivete o usate la dettatura della tastiera.'); el.textIn.focus(); return; }
+  if (Mouth.busy()) Mouth.cancel();
+  if (!Ear.start()) { toast('Non riesco ad accendere il microfono: scrivete o usate la dettatura della tastiera.'); el.textIn.focus(); }
+}
+function speakAsKidnapper(text) {
+  if (G.phase !== 'call' || G.ending) return;
+  text = String(text).slice(0, 400);
+  el.callLine.textContent = text;
+  G.lastLine = text;
+  G.transcript.push({ who: cap(G.persona.nome), text: text });
+  Mouth.cancel();
+  Mouth.say(text);
+}
+function bumpPatience(delta) {
+  if (G.phase !== 'call' || G.ending || G.caster < 0) return;
+  G.patience = clamp(G.patience + delta, 0, 100);
+  patienceUI();
+  if (G.patience <= 0) endCall('riaggancia');
+}
+function sendTyped() {
+  const v = el.textIn.value.replace(/\s+/g, ' ').trim();
+  if (!v) { el.textIn.focus(); return; }
+  el.textIn.value = '';
+  if (G.caster >= 0) { speakAsKidnapper(v); return; }
+  sendMessage(v);
+}
+function sendMessage(text) {
+  if (G.phase !== 'call' || G.thinking || G.ending) return;
+  text = String(text).replace(/\s+/g, ' ').trim().slice(0, 600);
+  if (!text) return;
+  if (Mouth.busy()) Mouth.cancel();
+  setHeard('Avete detto: «' + text + '»');
+  G.transcript.push({ who: 'Voi', text: text });
+  const left = mmss(G.endAt - Date.now());
+  ask('[Tempo rimasto ' + left + '. Pazienza attuale ' + Math.round(G.patience) + '.] Al telefono dicono: «' + text + '»', text);
+}
+async function ask(userContent, shownText, final) {
+  G.thinking = true; G.pending = { content: userContent, shown: shownText, final: !!final };
+  el.callRetry.hidden = true;
+  callUI();
+  const convo = G.convo.concat([{ role: 'user', content: userContent }]);
+  let spoken = 0;
+  const speakNew = (vis, all) => {
+    const rest = vis.slice(spoken);
+    let cut = -1; const re = /[.!?…]+["»”)]*\s/g; let m;
+    while ((m = re.exec(rest))) cut = m.index + m[0].length;
+    if (all) cut = rest.length;
+    if (cut > 0) { Mouth.say(rest.slice(0, cut)); spoken += cut; }
+  };
+  const ctl = new AbortController(); G.ctl = ctl;
+  let raw = '';
+  try {
+    raw = await Brain.ask(rules(), convo, {
+      signal: ctl.signal,
+      onText: t => { if (G.ctl !== ctl) return; const v = visible(t); el.callLine.textContent = v; speakNew(v, false); }
+    });
+  } catch (e) {
+    if (G.ctl !== ctl) return;
+    G.thinking = false;
+    if (e && e.code === 'cancelled') { callUI(); return; }
+    if (G.pending && G.pending.shown) G.transcript.pop();
+    el.callStatus.textContent = errorText(e);
+    el.callRetry.hidden = false;
+    callUI(); el.callStatus.textContent = errorText(e);
+    return;
+  }
+  if (G.ctl !== ctl) return;
+  G.ctl = null;
+  const vis = visible(raw);
+  el.callLine.textContent = vis || '…';
+  speakNew(vis, true);
+  G.convo = convo.concat([{ role: 'assistant', content: raw }]);
+  if (vis) { G.transcript.push({ who: cap(G.persona.nome), text: vis }); G.lastLine = vis; }
+  const st = parseState(raw);
+  if (st) {
+    if (typeof st.pazienza === 'number' && isFinite(st.pazienza)) G.patience = clamp(st.pazienza, 0, 100);
+    if (typeof st.riscatto === 'string' && st.riscatto.trim()) el.callRansom.textContent = st.riscatto.trim().slice(0, 120);
+  }
+  patienceUI();
+  G.thinking = false;
+  if (G.voice && !Mouth.ok && !G.mouthNoted) { G.mouthNoted = true; toast('Qui il telefono non ha la voce: chi è più vicino legga le battute del rapitore, con voce da cattivo.'); }
+  const freed = !!(st && st.liberato === true);
+  if (freed) return endCall('liberato');
+  if (final) return endCall('tempo');
+  if ((st && st.riaggancia === true) || G.patience <= 0) return endCall('riaggancia');
+  if (G.timeUp) return finalTurn();
+  callUI();
+  if (G.listen === 'auto') afterSpeech(() => { if (G.phase === 'call' && !G.thinking && !G.ending && !Ear.on) Ear.start(); });
+}
+function afterSpeech(fn) {
+  if (!Mouth.busy()) { setTimeout(fn, 250); return; }
+  Mouth.onIdle = () => { Mouth.onIdle = null; callUI(); setTimeout(fn, 250); };
+}
+function retry() {
+  const p = G.pending; if (!p || G.thinking) return;
+  if (p.shown) G.transcript.push({ who: 'Voi', text: p.shown });
+  ask(p.content, p.shown, p.final);
+}
+function endCall(outcome) {
+  if (G.ending) return;
+  G.ending = true; G.outcome = outcome;
+  clearInterval(G.timer);
+  Ear.abort();
+  if (G.ctl) { try { G.ctl.abort(); } catch (e) {} G.ctl = null; }
+  G.thinking = false;
+  callUI();
+  const finish = () => {
+    Mouth.onIdle = null;
+    G.phase = 'over';
+    Snd.hangup();
+    const h = G.hostage;
+    const T = {
+      liberato: ['Ostaggio liberato!', 'Il rapitore ha restituito ' + h + '. Ce l’avete fatta.'],
+      riaggancia: ['Ha riattaccato', 'La pazienza del rapitore è finita: ' + h + ' resta a lui.'],
+      tempo: ['Tempo scaduto', h + ' resta nelle mani del rapitore.'],
+      voi: ['Avete riattaccato', h + ' resta nelle mani del rapitore.']
+    }[outcome];
+    el.overTitle.textContent = T[0];
+    el.overText.textContent = T[1];
+    el.overLine.textContent = G.lastLine || '…';
+    el.overNote.hidden = !G.lastLine || outcome === 'voi';
+    show('over');
+  };
+  if (outcome === 'voi') { Mouth.cancel(); finish(); return; }
+  if (!Mouth.busy()) { setTimeout(finish, 900); return; }
+  const guard = setTimeout(() => { Mouth.cancel(); finish(); }, 15000);
+  Mouth.onIdle = () => { clearTimeout(guard); setTimeout(finish, 500); };
+}
+function bindHangup() {
+  const btn = el.callHangup, label = btn.textContent; let t = 0;
+  btn.addEventListener('click', () => {
+    if (btn.dataset.sure === '1') { clearTimeout(t); btn.dataset.sure = ''; btn.textContent = label; endCall('voi'); return; }
+    btn.dataset.sure = '1'; btn.textContent = 'Tocca di nuovo per riattaccare';
+    t = setTimeout(() => { btn.dataset.sure = ''; btn.textContent = label; }, 3000);
+  });
+}
+
+/* ================= il complice ================= */
+function startVote() {
+  el.voteText.textContent = 'Al tre, ognuno indichi chi crede sia il complice del rapitore.';
+  el.votePick.hidden = true; el.votePick.textContent = ''; el.voteCount.hidden = false; el.voteCount.textContent = '';
+  show('vote');
+  ['Uno', 'Due', 'Tre!'].forEach((w, i) => setTimeout(() => { if (screen === 'vote') { el.voteCount.textContent = w; Snd.click(); } }, 600 + i * 900));
+  setTimeout(() => {
+    if (screen !== 'vote') return;
+    el.voteCount.hidden = true;
+    el.voteText.textContent = 'Chi è stato indicato da più persone? In caso di parità, decidete voi chi accusare.';
+    G.players.forEach((p, i) => {
+      if (i === G.caster) return;
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'btn wide'; b.textContent = p.name;
+      b.addEventListener('click', () => unmask(i)); el.votePick.appendChild(b);
+    });
+    el.votePick.hidden = false;
+  }, 600 + 3 * 900 + 200);
+}
+function unmask(i) {
+  G.vote = i;
+  el.unmaskHead.textContent = 'Accusate ' + G.players[i].name + '…';
+  el.unmaskText.textContent = '';
+  el.unmaskGo.hidden = true;
+  show('unmask');
+  setTimeout(() => {
+    const a = G.players[G.accomplice].name;
+    if (i === G.accomplice) { el.unmaskHead.textContent = 'Smascherato!'; el.unmaskText.textContent = a + ' era proprio il complice del rapitore.'; }
+    else { el.unmaskHead.textContent = 'Sbagliato!'; el.unmaskText.textContent = G.players[i].name + ' era innocente. Il complice era ' + a + ', e l’ha fatta franca.'; }
+    el.unmaskGo.hidden = false;
+  }, 1800);
+}
+
+/* ================= il verdetto sugli obiettivi ================= */
+async function startVerdict() {
+  G.verdict = G.players.map(() => ({ ok: false, why: '' }));
+  renderVerdict();
+  show('verdict');
+  if (G.caster >= 0) {
+    el.verdictGo.disabled = false;
+    el.verdictStatus.textContent = 'Non c’è un giudice automatico: decidete voi chi ha raggiunto il proprio obiettivo.';
+    return;
+  }
+  el.verdictGo.disabled = true;
+  el.verdictStatus.textContent = 'Il giudice riascolta la telefonata…';
+  const lines = G.transcript.map(t => (t.who === 'Voi' ? 'PERSONE' : 'RAPITORE') + ': ' + t.text).join('\n');
+  const goals = G.players.map((p, i) => (i + 1) + '. ' + p.goal).join('\n');
+  const prompt = 'Sei il giudice imparziale di un gioco di società. Ecco la trascrizione di una telefonata tra un rapitore (interpretato da un’intelligenza artificiale, il suo vero nome era ' + G.persona.vero + ') e un gruppo di persone. Le battute delle persone arrivano da un microfono e possono contenere parole storpiate.\n\nTRASCRIZIONE:\n' + (lines || '(vuota)') +
+    '\n\nOBIETTIVI DA VALUTARE (riguardano quello che il rapitore ha detto o fatto):\n' + goals +
+    '\n\nPer ogni obiettivo decidi se è stato raggiunto secondo la trascrizione: è raggiunto solo se è successo davvero. Rispondi solo con un JSON così: {"esiti": [{"n": 1, "ok": true, "perche": "frase brevissima"}]}';
+  try {
+    const data = await Brain.ask('', [{ role: 'user', content: prompt }], { json: true });
+    const arr = (data && (data.esiti || data.results)) || (Array.isArray(data) ? data : []);
+    arr.forEach(r => { const k = (r.n | 0) - 1; if (G.verdict[k]) { G.verdict[k].ok = !!r.ok; G.verdict[k].why = String(r.perche || r.why || '').slice(0, 160); } });
+    el.verdictStatus.textContent = 'Ecco il verdetto del giudice. Se ha sbagliato, correggetelo voi.';
+  } catch (e) {
+    el.verdictStatus.textContent = 'Il giudice non risponde: decidete voi chi ha raggiunto il proprio obiettivo.';
+  }
+  renderVerdict();
+  el.verdictGo.disabled = false;
+}
+function renderVerdict() {
+  el.verdictList.textContent = '';
+  G.players.forEach((p, i) => {
+    if (i === G.caster) return;
+    const li = document.createElement('li'); li.className = 'goal';
+    const head = document.createElement('div'); head.className = 'goal-head';
+    const b = document.createElement('b'); b.textContent = p.name + (i === G.accomplice ? ' (complice)' : '');
+    const t = document.createElement('button'); t.type = 'button'; t.className = 'toggle';
+    const sync = () => { t.setAttribute('aria-pressed', G.verdict[i].ok ? 'true' : 'false'); t.textContent = G.verdict[i].ok ? 'Riuscito' : 'Non riuscito'; };
+    t.addEventListener('click', () => { G.verdict[i].ok = !G.verdict[i].ok; sync(); });
+    sync();
+    head.appendChild(b); head.appendChild(t);
+    const g = document.createElement('p'); g.textContent = p.goal;
+    li.appendChild(head); li.appendChild(g);
+    if (G.verdict[i].why) { const w = document.createElement('p'); w.className = 'why'; w.textContent = G.verdict[i].why; li.appendChild(w); }
+    el.verdictList.appendChild(li);
+  });
+}
+
+/* ================= punti e classifica ================= */
+function showResults() {
+  const freed = G.outcome === 'liberato', caught = G.vote === G.accomplice;
+  G.players.forEach((p, i) => {
+    let s = 0;
+    const acc = i === G.accomplice;
+    if (freed && !acc) s += 3;
+    if (!freed && acc) s += 3;
+    if (G.verdict[i] && G.verdict[i].ok) s += 2;
+    if (caught && !acc) s += 1;
+    if (!caught && acc) s += 2;
+    p.score = s;
+  });
+  if (G.caster >= 0) G.players[G.caster].score = -1;
+  const list = G.players.map((p, i) => ({ p: p, i: i })).filter(x => x.i !== G.caster).sort((a, b) => b.p.score - a.p.score);
+  const top = list[0].p.score, winners = list.filter(x => x.p.score === top).map(x => x.p.name);
+  el.resTitle.textContent = winners.length > 1 ? 'Pari merito: ' + listNames(winners) : 'Vince ' + winners[0];
+  el.resSub.textContent = (freed ? 'L’ostaggio è stato liberato' : 'L’ostaggio è rimasto al rapitore') + (caught ? ' e il complice è stato smascherato.' : ', e il complice l’ha fatta franca.') + (G.caster >= 0 ? ' La voce era ' + G.players[G.caster].name + '.' : '');
+  el.resBoard.textContent = '';
+  list.forEach(x => {
+    const li = document.createElement('li'); if (x.p.score === top) li.className = 'first';
+    const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = x.p.name;
+    li.appendChild(nm);
+    if (x.i === G.accomplice) { const t = document.createElement('span'); t.className = 'tag'; t.textContent = 'complice'; li.appendChild(t); }
+    const sc = document.createElement('span'); sc.className = 'sc'; sc.textContent = x.p.score; li.appendChild(sc);
+    el.resBoard.appendChild(li);
+  });
+  el.resWhy.textContent = 'Ostaggio liberato: 3 punti agli altri, perso: 3 al complice. Obiettivo raggiunto: 2 punti. Complice smascherato: 1 punto agli altri, se la fa franca: 2 a lui.';
+  el.resLog.textContent = '';
+  G.transcript.forEach(t => {
+    const li = document.createElement('li');
+    const w = document.createElement('span'); w.className = 'who'; w.textContent = t.who;
+    const x = document.createElement('span'); if (t.who !== 'Voi') x.className = 'k'; x.textContent = t.text;
+    li.appendChild(w); li.appendChild(x); el.resLog.appendChild(li);
+  });
+  releaseWake();
+  show('results');
+}
+function toHome() {
+  clearInterval(G.timer); Snd.ringStop(); Ear.abort(); Mouth.cancel();
+  if (G.ctl) { try { G.ctl.abort(); } catch (e) {} G.ctl = null; }
+  G.phase = 'idle'; G.thinking = false; releaseWake();
+  show('home');
+}
+
+/* ================= collegamenti ================= */
+function init() {
+  loadPrefs();
+  document.addEventListener('pointerdown', () => { lastPD = now(); }, true);
+  document.addEventListener('click', e => { if (e.detail > 0 && lastPD < lastSwap) { e.stopPropagation(); e.preventDefault(); } }, true);
+  $$('[data-go]').forEach(b => b.addEventListener('click', () => {
+    const to = b.dataset.go;
+    if (to === 'setup') renderPlayers();
+    if (to === 'settings') settingsUI();
+    show(to);
+  }));
+  el.addBtn.addEventListener('click', addName);
+  el.nameIn.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addName(); } });
+  bindRadio(el.levels, 'level');
+  bindRadio(el.minutes, 'minutes', v => parseInt(v, 10));
+  bindRadio(el.listen, 'listen');
+  bindSwitches();
+  el.startBtn.addEventListener('click', () => { if (G.names.length < 3 || Brain.kind === 'none') return; Snd.ensure(); savePrefs(); newGame(); });
+  el.passShow.addEventListener('click', () => showRole(G.queue[G.passIdx]));
+  el.passBack.addEventListener('click', () => { G.peeking = false; show('call'); });
+  el.roleHide.addEventListener('click', hideRole);
+  $$('#caster [data-cast]').forEach(b => b.addEventListener('click', () => {
+    G.cast = b.dataset.cast;
+    if (G.cast !== 'human') G.caster = -1;
+    syncCast();
+  }));
+  el.callPeek.addEventListener('click', openPeek);
+  el.patDown.addEventListener('click', () => bumpPatience(-15));
+  el.patUp.addEventListener('click', () => bumpPatience(15));
+  el.ransomEdit.addEventListener('click', () => { el.ransomRow.hidden = !el.ransomRow.hidden; if (!el.ransomRow.hidden) el.ransomIn.focus(); });
+  el.ransomSave.addEventListener('click', () => {
+    const v = el.ransomIn.value.replace(/\s+/g, ' ').trim().slice(0, 80);
+    if (!v) return;
+    G.ransom = v; el.callRansom.textContent = v; el.ransomIn.value = ''; el.ransomRow.hidden = true;
+  });
+  el.scriptBtn.addEventListener('click', () => {
+    el.scriptNote.hidden = !el.scriptNote.hidden;
+    el.scriptNote.textContent = scriptCard();
+  });
+  el.freeBtn.addEventListener('click', () => endCall('liberato'));
+  el.ringGo.addEventListener('click', answerCall);
+  el.ringBack.addEventListener('click', toHome);
+  el.micBtn.addEventListener('click', micTap);
+  el.textSend.addEventListener('click', sendTyped);
+  el.textIn.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); sendTyped(); } });
+  el.callRetry.addEventListener('click', retry);
+  bindHangup();
+  el.overGo.addEventListener('click', startVote);
+  el.unmaskGo.addEventListener('click', startVerdict);
+  el.verdictGo.addEventListener('click', showResults);
+  el.againBtn.addEventListener('click', () => { Snd.ensure(); newGame(); });
+  el.setupBtn.addEventListener('click', () => { renderPlayers(); show('setup'); });
+  el.menuBtn.addEventListener('click', toHome);
+  el.keySave.addEventListener('click', () => {
+    const k = el.keyIn.value.trim();
+    if (!k) { toast('Incollate prima la chiave nel campo.'); el.keyIn.focus(); return; }
+    setKey(k); settingsUI();
+    if (Brain.kind !== 'claude') { Brain.kind = 'openrouter'; engineUI(); }
+    toast('Chiave salvata su questo telefono.');
+  });
+  el.keyClear.addEventListener('click', () => { setKey(''); settingsUI(); if (Brain.kind === 'openrouter') { Brain.kind = 'none'; engineUI(); } toast('Chiave cancellata.'); });
+  el.modelIn.addEventListener('change', () => { G.model = el.modelIn.value.trim() || DEFAULT_MODEL; el.modelIn.value = G.model; savePrefs(); engineUI(); });
+  el.testConn.addEventListener('click', testConnection);
+  el.voiceSel.addEventListener('change', () => { G.voiceURI = el.voiceSel.value; savePrefs(); });
+  el.voiceTest.addEventListener('click', () => {
+    if (!Mouth.ok) { toast('Questo telefono non ha la voce sintetica.'); return; }
+    const was = G.voice; G.voice = true; Mouth.cancel(); Mouth.say('Pronto? Ho il vostro telecomando. Trattiamo.'); G.voice = was;
+  });
+  if (Mouth.ok) { Mouth.load(); try { speechSynthesis.addEventListener('voiceschanged', () => Mouth.load()); } catch (e) {} }
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && G.phase === 'call') keepAwake(); });
+  engineUI();
+  renderPlayers();
+  show('home');
+  Brain.detect();
+  if (/[?&]debug\b/.test(location.search)) window.__vv = { G: G, Brain: Brain, Mouth: Mouth, Ear: Ear };
+  const web = (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1') && window.self === window.top;
+  if (web && 'serviceWorker' in navigator && !window.claude) {
+    window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+  }
+}
+init();
+})();
+
+</script>
+</body>
+</html>

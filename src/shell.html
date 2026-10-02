@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vivavoce</title>
+<meta name="description" content="Il telefono squilla. È un rapitore. Ha preso il telecomando.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Vivavoce">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#DCE3DE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E2427" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..900&family=Special+Elite&family=Abril+Fatface&family=Bungee&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#DCE3DE; --ink:#13201E; --ink-2:#3A4845; --muted:#5B6965; --card:#FFFFFF; --edge:#13201E; --line:#B7C2BC;
+  --primary:#CF1F62; --on-primary:#FFFFFF; --ok:#1E8A5A; --on-ok:#FFFFFF; --warn:#C98A00; --bad:#D23B2B; --on-bad:#FFFFFF; --focus:#1C5BD6;
+  --text:"Archivo","Roboto","Segoe UI",system-ui,sans-serif;
+  --type:"Special Elite","Courier New",monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E2427; --ink:#ECF1EB; --ink-2:#C5D2CC; --muted:#8FA49D; --card:#173439; --edge:#ECF1EB; --line:#2C4C50;
+    --primary:#FF5C9A; --on-primary:#13201E; --ok:#4CD08A; --on-ok:#0E2427; --warn:#FFC94A; --bad:#FF6B5B; --on-bad:#0E2427; --focus:#8FB4FF;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E2427; --ink:#ECF1EB; --ink-2:#C5D2CC; --muted:#8FA49D; --card:#173439; --edge:#ECF1EB; --line:#2C4C50;
+  --primary:#FF5C9A; --on-primary:#13201E; --ok:#4CD08A; --on-ok:#0E2427; --warn:#FFC94A; --bad:#FF6B5B; --on-bad:#0E2427; --focus:#8FB4FF;
+  color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px);background:var(--paper)}
+body{margin:0;height:100%;background:var(--paper);color:var(--ink);font-family:var(--text);font-size:17px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
+h1,h2,h3{margin:0;line-height:1.1;font-weight:800}
+p{margin:0}
+button,input,select{font:inherit;color:inherit}
+#app{position:relative;height:100%;max-width:620px;margin:0 auto;overflow:hidden}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;gap:14px;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:16px max(18px,env(safe-area-inset-right,0px)) 18px max(18px,env(safe-area-inset-left,0px))}
+.screen.active{display:flex;animation:fade .2s ease-out}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.push{margin-top:auto}
+.center{text-align:center}
+
+/* pulsanti e campi */
+.btn{appearance:none;-webkit-appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:10px 18px;
+  border:2px solid var(--edge);border-radius:12px;background:var(--card);color:var(--ink);font-weight:750;font-size:17px;line-height:1.15;text-align:center;
+  cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.btn:active{transform:scale(.98)}
+.btn:focus-visible,.opt:focus-visible,.seg [role=radio]:focus-visible,.switch:focus-visible,.x:focus-visible,.mic:focus-visible,.field:focus-visible,select:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
+.btn.answer{background:var(--ok);border-color:var(--ok);color:var(--on-ok)}
+.btn.hang{background:var(--bad);border-color:var(--bad);color:var(--on-bad)}
+.btn.big{font-size:21px;font-weight:850;font-stretch:90%;min-height:62px}
+.btn.plain{border-color:transparent;background:transparent;text-decoration:underline;text-underline-offset:4px;min-height:44px;font-weight:650;color:var(--ink-2)}
+.btn.small{min-height:40px;padding:6px 12px;font-size:15px;border-radius:10px}
+.btn[disabled]{opacity:.45;cursor:default;transform:none}
+.btn.wide{width:100%}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stack{display:grid;gap:10px}
+.note-text{font-size:15px;color:var(--muted)}
+.field{min-width:0;height:52px;padding:0 14px;border:2px solid var(--edge);border-radius:12px;background:var(--card);color:var(--ink);font-size:17px;width:100%}
+.field::placeholder{color:var(--muted)}
+select.field{appearance:auto}
+
+/* il titolo: lettere ritagliate dai giornali */
+.collage{display:flex;justify-content:center;flex-wrap:nowrap;gap:0;font-size:clamp(34px,10.4vw,78px);font-weight:400;line-height:1;padding:10px 0 6px}
+.c{display:inline-block;padding:.07em .13em .05em;margin:0 .015em;box-shadow:2px 3px 0 rgba(0,0,0,.22);clip-path:polygon(3% 0,100% 5%,97% 100%,0 94%)}
+.c1{background:#FFFFFF;color:#111;font-family:"Abril Fatface",Georgia,serif;transform:rotate(-5deg)}
+.c2{background:#FFE24A;color:#111;font-family:var(--type);transform:rotate(4deg) translateY(.08em)}
+.c3{background:#1C2A6E;color:#FFF;font-family:"Bungee",Impact,sans-serif;transform:rotate(-2deg) translateY(-.04em)}
+.c4{background:#CF1F62;color:#FFF;font-family:var(--text);font-weight:900;transform:rotate(6deg) translateY(.05em)}
+.c5{background:#111;color:#FFF;font-family:"Abril Fatface",Georgia,serif;transform:rotate(-3deg) translateY(.03em)}
+.c6{background:#F3EBDD;color:#B5121B;font-family:"Bungee",Impact,sans-serif;transform:rotate(3deg) translateY(-.05em)}
+.c7{background:#7FD1C6;color:#111;font-family:var(--type);transform:rotate(-6deg) translateY(.06em)}
+.c8{background:#FFFFFF;color:#111;font-family:var(--text);font-weight:800;font-stretch:75%;transform:rotate(4deg)}
+
+/* biglietto battuto a macchina, attaccato con lo scotch */
+.note{position:relative;background:#FFFDF7;color:#141414;font-family:var(--type);font-size:20px;line-height:1.4;padding:24px 18px 18px;
+  transform:rotate(-.6deg);box-shadow:0 2px 0 rgba(0,0,0,.08),3px 6px 14px rgba(0,0,0,.18);text-wrap:pretty}
+.note::before{content:"";position:absolute;top:-10px;left:50%;width:96px;height:22px;transform:translateX(-50%) rotate(2deg);background:rgba(255,226,74,.75);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.note small{display:block;font-family:var(--text);font-size:14px;font-weight:700;color:#5B6965;margin-bottom:6px}
+
+/* home */
+#s-home{text-align:center;justify-content:space-between}
+.lead-note{margin:8px auto 0;max-width:30ch;font-size:21px}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;border:2px solid var(--line);font-size:15px;font-weight:700;color:var(--ink-2)}
+.chip i{width:10px;height:10px;border-radius:50%;background:var(--muted)}
+.chip.on i{background:var(--ok)}
+.chip.off i{background:var(--bad)}
+
+/* preparazione e impostazioni */
+.bar{display:flex;align-items:center;gap:12px}
+.bar h2{font-size:26px;font-stretch:90%}
+.block{display:grid;gap:10px}
+.block h3{font-size:19px}
+.add{display:flex;gap:10px}
+.plist{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.plist:empty{display:none}
+.plist li{display:inline-flex;align-items:center;gap:2px;padding:3px 3px 3px 14px;border:2px solid var(--edge);border-radius:999px;background:var(--card);font-weight:700}
+.x{appearance:none;width:36px;height:36px;border:0;border-radius:50%;background:transparent;color:var(--ink);font-size:24px;line-height:1;cursor:pointer}
+.levels{display:grid;gap:8px}
+.opt{appearance:none;display:grid;gap:2px;text-align:left;padding:12px 14px;border:2px solid var(--edge);border-radius:12px;background:var(--card);color:var(--ink);cursor:pointer}
+.opt b{font-size:18px}
+.opt span{font-size:15px;color:var(--ink-2)}
+.opt[aria-checked="true"]{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
+.opt[aria-checked="true"] span{color:var(--on-primary)}
+.seg{display:flex;gap:8px}
+.seg [role=radio]{appearance:none;flex:1;min-height:52px;padding:6px 4px;border:2px solid var(--edge);border-radius:12px;background:var(--card);color:var(--ink);font-weight:750;font-size:16px;line-height:1.2;cursor:pointer}
+.seg [role=radio] small{display:block;font-weight:500;font-size:13px;color:var(--muted)}
+.seg [aria-checked="true"]{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
+.seg [aria-checked="true"] small{color:var(--on-primary)}
+.switch{appearance:none;display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;padding:12px 14px;border:2px solid var(--edge);border-radius:12px;background:var(--card);color:var(--ink);text-align:left;cursor:pointer}
+.switch span{display:grid;gap:2px}
+.switch b{font-size:17px}
+.switch small{font-size:14px;color:var(--ink-2)}
+.switch i{flex:none;position:relative;width:52px;height:30px;border-radius:999px;border:2px solid var(--edge);background:var(--line)}
+.switch i::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--edge);transition:transform .15s}
+.switch[aria-checked="true"] i{background:var(--primary)}
+.switch[aria-checked="true"] i::after{transform:translateX(22px);background:var(--on-primary)}
+.panel{display:grid;gap:10px;padding:14px;border:2px solid var(--line);border-radius:14px}
+.panel p{color:var(--ink-2);font-size:16px}
+.status{font-weight:750}
+.status.ok{color:var(--ok)}
+.status.bad{color:var(--bad)}
+.cta{position:sticky;bottom:-18px;margin:auto -18px -18px;padding:14px 18px 18px;background:linear-gradient(to bottom,rgba(0,0,0,0),var(--paper) 28%)}
+.rules{display:grid;gap:10px;max-width:36em}
+.rules h3{font-size:20px;margin-top:10px}
+.rules p{color:var(--ink-2)}
+.rules .intro{font-size:19px;color:var(--ink)}
+
+/* ruoli segreti */
+#s-pass,#s-role{text-align:center;justify-content:center}
+.pass-name{font-size:clamp(44px,14vw,80px);font-weight:900;font-stretch:85%;line-height:1;overflow-wrap:anywhere}
+.pass-sub{font-size:19px;color:var(--ink-2);max-width:28ch;margin:0 auto}
+.role-note{min-height:330px;display:grid;align-content:center;gap:14px;text-align:left}
+.role-note h2{font-family:var(--type);font-weight:400;font-size:28px}
+.role-note p{font-family:var(--type);font-size:20px}
+.role-note .extra{font-size:17px;color:#444}
+
+/* lo squillo */
+#s-ring{text-align:center;justify-content:center;gap:20px}
+.handset{width:140px;height:140px;margin:0 auto;border-radius:50%;display:grid;place-items:center;background:var(--card);border:2px solid var(--edge);animation:ring 1.2s ease-in-out infinite}
+.handset svg{width:72px;height:72px;fill:var(--ink)}
+@keyframes ring{0%,40%,100%{transform:rotate(0)}5%,15%,25%,35%{transform:rotate(-10deg)}10%,20%,30%{transform:rotate(10deg)}}
+.ring-who{font-size:30px;font-weight:850;font-stretch:90%}
+.ring-sub{color:var(--ink-2);font-size:18px}
+
+/* la telefonata */
+#s-call{gap:12px}
+.call-top{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.clock{font-size:40px;font-weight:850;font-stretch:85%;font-variant-numeric:tabular-nums;line-height:1}
+.clock.low{color:var(--bad)}
+.pat{flex:1;max-width:220px;display:grid;gap:4px}
+.pat-row{display:flex;justify-content:space-between;font-size:14px;font-weight:750;color:var(--ink-2)}
+.meter{position:relative;height:14px;border:2px solid var(--edge);border-radius:999px;background:var(--line);overflow:hidden}
+.meter .fill{position:absolute;left:0;top:0;bottom:0;width:70%;background:var(--ok);transition:width .6s ease,background-color .6s}
+.meter .fill.warn{background:var(--warn)}
+.meter .fill.bad{background:var(--bad)}
+.facts{display:grid;gap:2px;font-size:16px}
+.facts b{font-weight:800}
+.call-note{min-height:150px}
+.call-status{min-height:1.4em;font-weight:750;color:var(--ink-2);text-align:center}
+.heard{min-height:1.4em;text-align:center;color:var(--muted);font-style:italic;overflow-wrap:anywhere}
+.mic-row{display:grid;justify-items:center;gap:6px}
+.mic{appearance:none;width:96px;height:96px;border-radius:50%;border:0;background:var(--primary);color:var(--on-primary);display:grid;place-items:center;cursor:pointer;touch-action:manipulation}
+.mic svg{width:42px;height:42px;fill:currentColor}
+.mic.listening{animation:pulse 1.1s ease-out infinite}
+.mic[disabled]{opacity:.4;cursor:default;animation:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(207,31,98,.55)}100%{box-shadow:0 0 0 22px rgba(207,31,98,0)}}
+.mic-label{font-weight:800;font-size:16px}
+.type-row{display:flex;gap:8px}
+.call-foot{display:flex;justify-content:space-between;gap:10px;align-items:center}
+#human-desk{display:grid;gap:8px}
+#cast-pick{display:grid;gap:8px}
+#script-note{font-size:16px;color:var(--ink-2)}
+#caster .opt[aria-checked="true"]{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
+#caster .opt[aria-checked="true"] span{color:var(--on-primary)}
+
+/* fine chiamata, voto, verdetto */
+#s-over,#s-vote,#s-unmask{text-align:center}
+.headline{font-size:clamp(34px,10vw,52px);font-weight:900;font-stretch:85%;line-height:1.02;text-wrap:balance}
+.subline{font-size:19px;color:var(--ink-2);text-wrap:balance}
+.count{font-size:clamp(90px,32vw,160px);font-weight:900;line-height:1;min-height:1.05em}
+.pick{display:grid;gap:8px}
+.pick .btn{font-size:20px}
+.goals{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.goal{display:grid;gap:6px;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:var(--card)}
+.goal-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.goal-head b{font-size:18px}
+.goal p{color:var(--ink-2);font-size:15px}
+.goal .why{font-style:italic}
+.toggle{appearance:none;min-width:116px;min-height:40px;border-radius:999px;border:2px solid var(--edge);background:transparent;color:var(--ink);font-weight:800;cursor:pointer}
+.toggle[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:var(--on-ok)}
+.board{list-style:none;margin:0;padding:0;display:grid;gap:8px;counter-reset:pos}
+.board li{display:flex;align-items:center;gap:12px;padding:10px 14px;border:2px solid var(--edge);border-radius:12px;background:var(--card);font-weight:700;counter-increment:pos}
+.board li::before{content:counter(pos);font-weight:900;min-width:1.2em;text-align:center}
+.board .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.board .tag{font-size:13px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--primary);color:var(--on-primary)}
+.board .sc{font-weight:900;font-size:22px;font-variant-numeric:tabular-nums}
+.board li.first{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
+.board li.first .tag{background:var(--on-primary);color:var(--primary)}
+.why-pts{font-size:14px;color:var(--muted)}
+.log{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.log li{padding:8px 0;border-bottom:1px solid var(--line);font-size:16px}
+.log .k{font-family:var(--type)}
+.log .who{display:block;font-size:13px;font-weight:800;color:var(--muted)}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:40;max-width:min(92vw,460px);
+  padding:12px 16px;border:2px solid var(--edge);border-radius:12px;background:var(--card);color:var(--ink);font-weight:700;
+  opacity:0;transform:translate(-50%,14px);pointer-events:none;transition:opacity .2s,transform .2s}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion: reduce){
+  .screen.active,.handset,.mic.listening{animation:none}
+  .switch i::after,.toast,.meter .fill{transition:none}
+}
+</style>
+</head>
+<body>
+<main id="app">
+
+  <section class="screen active" id="s-home" aria-labelledby="home-title">
+    <div>
+      <h1 class="collage" id="home-title" aria-label="Vivavoce"><span class="c c1" aria-hidden="true">V</span><span class="c c2" aria-hidden="true">i</span><span class="c c3" aria-hidden="true">V</span><span class="c c4" aria-hidden="true">a</span><span class="c c5" aria-hidden="true">v</span><span class="c c6" aria-hidden="true">O</span><span class="c c7" aria-hidden="true">c</span><span class="c c8" aria-hidden="true">e</span></h1>
+    </div>
+    <div class="note lead-note">Il telefono squilla. È un rapitore. Ha preso il telecomando, e vi concede dieci minuti per trattare.</div>
+    <div class="stack">
+      <p class="center"><span class="chip" id="engine-chip"><i></i><span id="engine-chip-text">Controllo il collegamento…</span></span></p>
+      <button class="btn primary big wide" data-go="setup" type="button">Nuova chiamata</button>
+      <div class="two">
+        <button class="btn" data-go="rules" type="button">Come si gioca</button>
+        <button class="btn" data-go="settings" type="button">Impostazioni</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="s-setup" aria-labelledby="setup-title">
+    <header class="bar"><button class="btn small" data-go="home" type="button">Indietro</button><h2 id="setup-title">Nuova chiamata</h2></header>
+    <p class="note-text" id="setup-engine"></p>
+    <div class="block">
+      <h3>Chi tratta col rapitore</h3>
+      <div class="add">
+        <input class="field" id="name-in" type="text" maxlength="16" placeholder="Scrivi un nome" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="done" aria-label="Nome di chi gioca">
+        <button class="btn" id="add-btn" type="button">Aggiungi</button>
+      </div>
+      <ul class="plist" id="plist" aria-live="polite"></ul>
+      <p class="note-text" id="pnote"></p>
+    </div>
+    <div class="block">
+      <h3 id="lv-h">Livello</h3>
+      <div class="levels" id="levels" role="radiogroup" aria-labelledby="lv-h">
+        <button class="opt" type="button" role="radio" data-val="soft"><b>Soft</b><span>Un cattivo da cartone animato: va bene anche con i bambini.</span></button>
+        <button class="opt" type="button" role="radio" data-val="ironico"><b>Ironico</b><span>Per adulti: sarcastico, permaloso e pieno di frecciatine.</span></button>
+        <button class="opt" type="button" role="radio" data-val="piccante"><b>Piccante</b><span>Un seduttore da telenovela. Solo se tutto il gruppo è d’accordo.</span></button>
+      </div>
+    </div>
+    <div class="block">
+      <h3 id="du-h">Durata della trattativa</h3>
+      <div class="seg" id="minutes" role="radiogroup" aria-labelledby="du-h">
+        <button type="button" role="radio" data-val="6">Breve<small>6 minuti</small></button>
+        <button type="button" role="radio" data-val="10">Normale<small>10 minuti</small></button>
+        <button type="button" role="radio" data-val="15">Lunga<small>15 minuti</small></button>
+      </div>
+    </div>
+    <div class="block">
+      <h3 id="who-h">Chi fa la voce</h3>
+      <div class="levels" id="caster" role="radiogroup" aria-labelledby="who-h">
+        <button class="opt" type="button" role="radio" data-cast="ai" aria-checked="true"><b>Il telefono</b><span>Risponde lui a quello che dite, quando la voce di casa è accesa. Nessuno porta una chiave.</span></button>
+        <button class="opt" type="button" role="radio" data-cast="human" aria-checked="false"><b>Uno di noi</b><span>Una persona fa il rapitore con la propria voce. Il telefono le tiene il copione, nascosto agli altri.</span></button>
+      </div>
+      <div id="cast-pick" hidden></div>
+    </div>
+    <div class="cta"><button class="btn primary big wide" id="start-btn" type="button">Distribuisci gli obiettivi</button></div>
+  </section>
+
+  <section class="screen" id="s-settings" aria-labelledby="set-title">
+    <header class="bar"><button class="btn small" data-go="home" type="button">Indietro</button><h2 id="set-title">Impostazioni</h2></header>
+    <div class="panel">
+      <h3>Chi fa il rapitore</h3>
+      <p class="status" id="engine-state"></p>
+      <p id="engine-help">La voce automatica si accende con una chiave sola, sul server, mai nel telefono di chi gioca. Senza quella, il rapitore lo fa uno di voi. La chiave qui sotto serve solo se volete un modello vostro, su questo telefono.</p>
+    </div>
+    <div class="panel">
+      <h3>Chiave di OpenRouter</h3>
+      <p>Resta salvata solo su questo telefono, mai nel codice. Create una chiave apposta per il gioco, con un limite di spesa.</p>
+      <input class="field" id="key-in" type="password" autocomplete="off" spellcheck="false" placeholder="Incolla qui la chiave (sk-or-…)" aria-label="Chiave di OpenRouter">
+      <div class="two"><button class="btn primary" id="key-save" type="button">Salva la chiave</button><button class="btn" id="key-clear" type="button">Cancella la chiave</button></div>
+      <label class="note-text" for="model-in">Modello</label>
+      <input class="field" id="model-in" type="text" autocomplete="off" spellcheck="false" aria-label="Modello di OpenRouter">
+      <button class="btn" id="test-conn" type="button">Prova il collegamento</button>
+      <p class="status" id="test-result" aria-live="polite"></p>
+    </div>
+    <div class="panel">
+      <h3>Voce e ascolto</h3>
+      <button class="switch" type="button" role="switch" data-key="voice"><span><b>Voce del rapitore</b><small>Il telefono legge ad alta voce le sue battute.</small></span><i aria-hidden="true"></i></button>
+      <label class="note-text" for="voice-sel">Voce</label>
+      <select class="field" id="voice-sel" aria-label="Voce del rapitore"></select>
+      <button class="btn" id="voice-test" type="button">Prova la voce</button>
+      <h3 id="li-h" style="margin-top:6px">Come vi ascolta</h3>
+      <div class="seg" id="listen" role="radiogroup" aria-labelledby="li-h">
+        <button type="button" role="radio" data-val="tap">Tocca e parla<small>un messaggio alla volta</small></button>
+        <button type="button" role="radio" data-val="auto">Sempre in ascolto<small>può sentire la propria voce</small></button>
+      </div>
+      <p class="note-text" id="mic-support"></p>
+    </div>
+  </section>
+
+  <section class="screen" id="s-rules" aria-labelledby="rules-title">
+    <header class="bar"><button class="btn small" data-go="home" type="button">Indietro</button><h2 id="rules-title">Come si gioca</h2></header>
+    <article class="rules">
+      <p class="intro">Il telefono squilla. Dall’altra parte c’è un rapitore melodrammatico e permaloso. Può essere il telefono, oppure uno di voi con la propria voce. Ha sequestrato qualcosa di assurdo e vi concede pochi minuti per trattare.</p>
+      <h3>Prima della chiamata</h3>
+      <p>Da 3 a 8 persone. Il telefono passa di mano in mano e ognuno riceve in segreto un obiettivo personale: farsi chiamare per nome, fargli dire «pistacchio», scoprire il suo vero nome. Uno di voi, invece, è il suo complice. Se il rapitore lo fa una persona, lei non è il complice e non prende punti: ha il copione.</p>
+      <h3>La voce</h3>
+      <p>Con «Il telefono», parlate in vivavoce e lui risponde. Quello che dite esce dal telefono e va al modello. Con «Uno di noi», il telefono lo tiene in mano chi fa il rapitore e gli altri non guardano: non esce niente. Durante la chiamata con il telefono potete riguardare il vostro obiettivo, gli altri voltati.</p>
+      <h3>La trattativa</h3>
+      <p>Toccate il microfono e parlategli: vi ascolta e risponde davvero a quello che dite. Improvvisa, si offende, alza il prezzo, cambia idea. Potete parlare in più persone, ma un messaggio alla volta. Se il microfono non funziona, scrivete o usate la dettatura della tastiera.</p>
+      <p>Sullo schermo vedete il tempo che resta e la sua pazienza. Se la pazienza finisce, riattacca.</p>
+      <h3>Il complice</h3>
+      <p>Il complice deve far fallire la trattativa senza farsi scoprire. Il rapitore sa di averne uno tra voi, ma non sa chi è.</p>
+      <h3>Alla fine</h3>
+      <p>Al tre indicate tutti chi credete sia il complice. Poi un giudice riascolta la telefonata e dice chi ha raggiunto il proprio obiettivo; se sbaglia, potete correggerlo voi.</p>
+      <h3>I punti</h3>
+      <p>Ostaggio liberato: 3 punti a ciascuno, tranne il complice. Ostaggio perso: 3 punti al complice. Ogni obiettivo segreto raggiunto vale 2 punti. Se smascherate il complice, 1 punto a testa agli altri; se la fa franca, 2 punti a lui.</p>
+      <h3>I livelli</h3>
+      <p>Soft è un cattivo da cartone animato, adatto anche ai bambini. Ironico è sarcastico e pieno di frecciatine. Piccante è un seduttore da telenovela: solo se tutto il gruppo è d’accordo.</p>
+    </article>
+    <div class="cta"><button class="btn primary big wide" data-go="setup" type="button">Nuova chiamata</button></div>
+  </section>
+
+  <section class="screen" id="s-pass" aria-labelledby="pass-name">
+    <p class="pass-sub">Passate il telefono a</p>
+    <h2 class="pass-name" id="pass-name"></h2>
+    <p class="pass-sub" id="pass-hint">Solo tu devi guardare lo schermo.</p>
+    <div class="pick" id="pass-pick" hidden></div>
+    <div class="stack push">
+      <button class="btn primary big wide" id="pass-show" type="button">Sono io: mostra l’obiettivo</button>
+      <button class="btn plain" id="pass-back" type="button" hidden>Torna alla telefonata</button>
+    </div>
+  </section>
+
+  <section class="screen" id="s-role" aria-labelledby="role-title">
+    <div class="note role-note">
+      <h2 id="role-title"></h2>
+      <p id="role-goal"></p>
+      <p class="extra" id="role-extra"></p>
+    </div>
+    <button class="btn primary big wide push" id="role-hide" type="button">Nascondi e passa il telefono</button>
+  </section>
+
+  <section class="screen" id="s-ring" aria-labelledby="ring-who">
+    <div class="handset" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></div>
+    <p class="ring-who" id="ring-who">Numero sconosciuto</p>
+    <p class="ring-sub" id="ring-sub">Mettete il telefono al centro del tavolo, con il volume alto.</p>
+    <div class="stack push">
+      <button class="btn answer big wide" id="ring-go" type="button">Rispondi in vivavoce</button>
+      <button class="btn plain" id="ring-back" type="button">Non ora, torna al menu</button>
+    </div>
+  </section>
+
+  <section class="screen" id="s-call" aria-label="La telefonata">
+    <div class="call-top">
+      <p class="clock" id="call-time" aria-label="Tempo rimasto">10:00</p>
+      <div class="pat"><div class="pat-row"><span>Pazienza</span><span id="pat-num">70</span></div><div class="meter"><div class="fill" id="pat-fill"></div></div></div>
+    </div>
+    <div class="facts"><p>Ostaggio: <b id="call-hostage"></b></p><p>Riscatto: <b id="call-ransom"></b></p></div>
+    <div class="note call-note"><small id="call-who">Il rapitore</small><span id="call-line"></span></div>
+    <p class="call-status" id="call-status" aria-live="polite"></p>
+    <p class="heard" id="call-heard"></p>
+    <div id="human-desk" hidden>
+      <div class="two">
+        <button class="btn" id="pat-down" type="button">Si offende</button>
+        <button class="btn" id="pat-up" type="button">Si addolcisce</button>
+      </div>
+      <button class="btn wide" id="ransom-edit" type="button">Cambia il riscatto</button>
+      <div class="type-row" id="ransom-row" hidden>
+        <input class="field" id="ransom-in" type="text" maxlength="80" placeholder="Il nuovo riscatto" aria-label="Nuovo riscatto">
+        <button class="btn primary" id="ransom-save" type="button">Metti</button>
+      </div>
+      <button class="btn wide" id="script-btn" type="button">Riguarda il copione</button>
+      <p id="script-note" hidden></p>
+      <button class="btn primary wide" id="free-btn" type="button">Libera l’ostaggio</button>
+    </div>
+    <div class="mic-row push" id="mic-row">
+      <button class="mic" id="mic-btn" type="button" aria-label="Parla al rapitore"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11z"/></svg></button>
+      <p class="mic-label" id="mic-label">Tocca e parla</p>
+    </div>
+    <div class="type-row">
+      <input class="field" id="text-in" type="text" autocomplete="off" placeholder="Oppure scrivete o dettate qui" aria-label="Messaggio per il rapitore" enterkeyhint="send">
+      <button class="btn primary" id="text-send" type="button">Invia</button>
+    </div>
+    <div class="call-foot">
+      <button class="btn small" id="call-peek" type="button">Il mio obiettivo</button>
+      <button class="btn small" id="call-retry" type="button" hidden>Riprova</button>
+      <button class="btn hang small" id="call-hangup" type="button">Riattacca</button>
+    </div>
+  </section>
+
+  <section class="screen" id="s-over" aria-labelledby="over-title">
+    <h2 class="headline" id="over-title"></h2>
+    <p class="subline" id="over-text"></p>
+    <div class="note" id="over-note"><small>L’ultima battuta del rapitore</small><span id="over-line"></span></div>
+    <button class="btn primary big wide push" id="over-go" type="button">Chi era il complice?</button>
+  </section>
+
+  <section class="screen" id="s-vote" aria-labelledby="vote-title">
+    <h2 class="headline" id="vote-title">Chi era il complice?</h2>
+    <p class="subline" id="vote-text"></p>
+    <p class="count" id="vote-count" aria-live="assertive"></p>
+    <div class="pick" id="vote-pick" hidden></div>
+  </section>
+
+  <section class="screen" id="s-unmask" aria-labelledby="unmask-head">
+    <h2 class="headline" id="unmask-head"></h2>
+    <p class="subline" id="unmask-text"></p>
+    <button class="btn primary big wide push" id="unmask-go" type="button" hidden>Il verdetto sugli obiettivi</button>
+  </section>
+
+  <section class="screen" id="s-verdict" aria-labelledby="verdict-title">
+    <h2 class="headline" id="verdict-title" style="text-align:left">Gli obiettivi segreti</h2>
+    <p class="subline" id="verdict-status" style="text-align:left" aria-live="polite"></p>
+    <ul class="goals" id="verdict-list"></ul>
+    <button class="btn primary big wide push" id="verdict-go" type="button">Calcola i punti</button>
+  </section>
+
+  <section class="screen" id="s-results" aria-labelledby="res-title">
+    <h2 class="headline" id="res-title"></h2>
+    <p class="subline" id="res-sub"></p>
+    <ol class="board" id="res-board"></ol>
+    <p class="why-pts" id="res-why"></p>
+    <div class="block">
+      <h3>La telefonata</h3>
+      <ul class="log" id="res-log"></ul>
+    </div>
+    <div class="stack">
+      <button class="btn primary big wide" id="again-btn" type="button">Nuova chiamata</button>
+      <div class="two"><button class="btn" id="setup-btn" type="button">Cambia giocatori</button><button class="btn" id="menu-btn" type="button">Menu</button></div>
+    </div>
+  </section>
+
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/*__CONTENT__*/
+</script>
+<script>
+/*__APP__*/
+</script>
+</body>
+</html>
