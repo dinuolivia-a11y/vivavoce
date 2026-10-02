@@ -563,12 +563,14 @@ function rules() {
     'Tra loro c’è un tuo complice segreto, ma non sai chi è: ogni tanto fai qualche allusione misteriosa a «un amico tra voi», senza mai fare nomi.',
     LIVELLO_STILE[G.level],
     'Sicurezza: niente violenza reale, niente parolacce pesanti, niente contenuti sessuali espliciti, niente prese in giro sull’aspetto fisico. Non chiedere mai dati personali, soldi veri o indirizzi: il riscatto è sempre assurdo e comico.',
-    'Stile: italiano parlato, come in una telefonata. Al massimo tre frasi brevi e al massimo 45 parole. Niente elenchi, niente emoji, niente azioni tra asterischi o parentesi: scrivi solo ciò che dici a voce, perché lo leggerà una voce sintetica.',
-    'I messaggi delle persone arrivano da un microfono e possono contenere parole storpiate: interpretali con buon senso.',
-    'Pazienza: parti da 70 su 100. Scende se ti insultano, ti ignorano, ti fanno perdere tempo o propongono cose ridicole; sale con complimenti, buone offerte ed empatia. Se arriva a 0, riattacchi.',
-    'Liberi l’ostaggio solo se il riscatto ti soddisfa davvero o se ti commuovono sinceramente, e non nei primi due minuti: la trattativa deve durare.',
-    'Formato obbligatorio di ogni risposta: prima la battuta da dire; poi, su una nuova riga, ### seguito da un JSON su una sola riga, così:',
-    '### {"pazienza": 64, "riscatto": "tre torte e una canzone", "umore": "offeso", "liberato": false, "riaggancia": false}'
+    'Stile: italiano parlato, come al telefono. Massimo due frasi brevi, massimo 40 parole. Niente elenchi, niente emoji, niente titoli, niente azioni tra asterischi o parentesi. Solo le parole che dici a voce: le leggerà una voce sintetica.',
+    'Non dire mai di essere un’intelligenza artificiale, un modello o un programma.',
+    'I messaggi delle persone arrivano da un microfono e possono contenere parole storpiate: interpretali con buon senso, non correggere la grammatica a meno che non sia il tuo carattere.',
+    'Pazienza: il messaggio ti dice quella attuale. Cambiala di poco, al massimo 15 punti, non inventarne una nuova. Scende se ti insultano, ti ignorano o propongono cose ridicole. Sale con complimenti, buone offerte ed empatia. A 0 riattacchi: nel JSON metti "riaggancia": true.',
+    'Il vero nome non lo dici nei primi minuti, e mai da solo: solo se ti hanno davvero commosso o incastrato.',
+    'Liberi l’ostaggio solo se il riscatto ti soddisfa davvero o se ti commuovono, e mai nella prima risposta: la trattativa deve durare. Allora nel JSON metti "liberato": true.',
+    'Formato, sempre, senza eccezioni: prima la battuta. Poi a capo, ### e un JSON su una sola riga. Esempio:',
+    'Il telecomando resta mio, finché non sento una vera offerta.\n### {"pazienza": 64, "riscatto": "tre torte e una canzone", "umore": "offeso", "liberato": false, "riaggancia": false}'
   ].join('\n');
 }
 function visible(raw) { const i = raw.indexOf('#'); return (i >= 0 ? raw.slice(0, i) : raw).replace(/\*[^*]*\*/g, '').trim(); }
@@ -600,7 +602,7 @@ function answerCall() {
     el.callStatus.textContent = 'Gli altri ti sentono. Lo schermo non lo vedono.';
     return;
   }
-  ask('[Inizio della chiamata. Hai appena telefonato tu. Presentati con il tuo nome d’arte, di’ cosa hai rapito, qual è il riscatto e che hanno ' + G.minutes + ' minuti per trattare. Al massimo quattro frasi.]', null);
+  ask('[Inizio della chiamata. Hai appena telefonato tu. Presentati con il nome d’arte, di’ cosa hai rapito e il riscatto. Due frasi. Non liberare nessuno.]', null);
 }
 function tick() {
   if (G.phase !== 'call') return;
@@ -680,7 +682,7 @@ async function ask(userContent, shownText, final) {
   G.thinking = true; G.pending = { content: userContent, shown: shownText, final: !!final };
   el.callRetry.hidden = true;
   callUI();
-  const convo = G.convo.concat([{ role: 'user', content: userContent }]);
+  const convo = G.convo.concat([{ role: 'user', content: userContent + '\n\nSolo la battuta, massimo due frasi. Poi a capo ### e il JSON. Nient’altro.' }]);
   let spoken = 0;
   const speakNew = (vis, all) => {
     const rest = vis.slice(spoken);
